@@ -45,3 +45,38 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# thuthesis
+auto
+node_modules
+dist
+.DS_Store
+*~
+*.aux
+*.bak
+*.bbl
+*.blg
+*.dvi
+*.glo
+*.gls
+*.idx
+*.ilg
+*.ind
+*.ist
+*.log
+*.out
+*.thm
+*.toc
+*.lof
+*.lot
+*.loe
+*.vrb
+*.hd
+*.fdb_latexmk
+*.fls
+dtx-style.sty
+thuthesis.cls
+thuthesis.cfg
+thuthesis.pdf
+main.pdf
+shuji.pdf

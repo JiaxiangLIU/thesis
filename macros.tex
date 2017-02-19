@@ -1,0 +1,224 @@
+%%% calligraphic letters
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cE}{\mathcal{E}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cI}{\mathcal{I}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cM}{\mathcal{M}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cR}{\mathcal{R}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cV}{\mathcal{V}}
+\newcommand{\cX}{\mathcal{X}}
+\newcommand{\cY}{\mathcal{Y}}
+
+%%% brackets
+\newcommand{\lb}{\langle}
+\newcommand{\rb}{\rangle}
+
+%%% arrows
+\newcommand{\la}{\leftarrow}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\da}{\downarrow}
+\newcommand{\ua}{\uparrow}
+\newcommand{\dive}{\uparrow\vspace{0.5mm}\uparrow}
+\newcommand{\lra}{\leftrightarrow}
+\newcommand{\lh}{\leftharpoons}
+\newcommand{\rh}{\rightharpoons}
+\newcommand{\rlh}{\rightleftharpoons}
+\newcommand{\Lla}{\longleftarrow}
+\newcommand{\Lra}{\longrightarrow}
+\newcommand{\Llra}{\longleftrightarrow}
+\newcommand{\Dla}{\Leftarrow}
+\newcommand{\Dra}{\Rightarrow}
+\newcommand{\Dda}{\Downarrow}
+\newcommand{\Dua}{\Uparrow}
+\newcommand{\Dlra}{\Leftrightarrow}
+\newcommand{\Nla}{\not\rightarrow}
+\newcommand{\Nra}{\not\leftarrow}
+\newcommand{\raa}{\ra_{aliens}}
+\newcommand{\rac}{\ra_{cap}}
+\newcommand{\raA}{\ra_{A}}
+\newcommand{\raC}{\ra_{C}}
+%\newcommand{\nf}[1]{#1\!\!\downarrow}
+
+\newcommand{\Var}[1]{\mathcal{V}ar({#1})}
+\newcommand{\FVar}[1]{\mathcal{FV}ar({#1})}
+\newcommand{\Pos}[1]{\mathcal{P}os({#1})}
+\newcommand{\FPos}[1]{\mathcal{FP}os({#1})}
+\newcommand{\VPos}[1]{\mathcal{VP}os({#1})}
+\newcommand{\rootp}{\mbox {\footnotesize $\Lambda$}}
+\newcommand{\Dom}[1]{\mathcal{D}om({#1})}
+\newcommand{\TFX}{\cT(\cF,\cX)}
+\newcommand{\GTF}{\cT(\cF)}
+\newcommand{\Ran}[1]{{\cV\cR}an({#1})}
+
+\renewcommand{\emptyset}{\varnothing}
+
+%%% macros specifiques
+\newcommand{\nat}{\mbox{$I\!\!N$}}
+\newcommand{\vect}[1]{\overline{#1}}
+%\newcommand{\interp}[1]{\mbox{$[\!\mid \!\! #1 \!\! \mid\!]$}}
+\newcommand{\interp}[1]{\llbracket #1 \rrbracket}
+%\newcommand{\Ft}{\mbox{$F_{\textit{T}}$}\xspace}
+%\newcommand{\Fnt}{\mbox{$F_{\textit{NT}}$}\xspace}
+
+
+
+
+%%% orders
+% for labels
+\newcommand{\ordl}{\gtordl}
+\newcommand{\gtordl}{\rhd}
+\newcommand{\geordl}{\unrhd}
+\newcommand{\ltordl}{\lhd}
+\newcommand{\leordl}{\unlhd}
+% for positions
+\newcommand{\gtordp}{>_{\cP}}
+\newcommand{\geordp}{\ge_{\cP}}
+\newcommand{\ltordp}{<_{\cP}}
+\newcommand{\leordp}{\le_{\cP}}
+\newcommand{\ordp}{\gtordp}
+% for subsumption
+\newcommand{\gtsubs}{\gtrdot}   %{{\scriptsize \bullet}{\hspace{-0.75mm}>}}
+\newcommand{\gesubs}{\mathrel{\stackrel{\scriptscriptstyle\bullet}{}{\!\!\!\!\geq}}}
+%\newcommand{\gesubs}{\mathrel{\cdot\!\!\!\geq}}
+% for conversions
+\newcommand{\po}{\mathrel{\succ\!\!\succ}}
+\newcommand{\poeq}{\mathrel{\succeq\!\!\succeq}}
+% others
+\newcommand{\ordo}{\succ}
+\newcommand{\rpo}{\succ_H}
+\newcommand{\gerpo}{\succeq_H}
+\newcommand{\rpomul}{\,(\rpo)_{mul}\,}
+\newcommand{\gerpomul}{\,(\gerpo)_{mul}\,}
+
+
+
+\newcommand{\cp}[1]{\cC\cP(#1)}
+\newcommand{\pcp}[1]{\cP\cC\cP(#1)}
+\newcommand{\hcp}[1]{\cH\cC\cP(#1)}
+
+\newcommand{\lmm}[1]{\vect{#1}}
+\newcommand{\mm}[1]{mm({#1})}
+
+%\newcommand{\lll}[1]{ll(#1)}
+\newcommand{\rll}[1]{rl(#1)}
+\newcommand{\ml}[1]{\cL(#1)}
+
+\newcommand{\fp}[1]{\mbox{\textsc{F}$_{\textsc p}$($#1$)}}
+\newcommand{\vL}[1]{{\textsc{vl}}(#1)}
+\newcommand{\vS}[1]{{\textsc{vs}}(#1)}
+\newcommand{\vs}[1]{{\textsc{sh}}(#1)}
+\newcommand{\hp}[1]{\cH p(#1)}
+\newcommand{\hit}[1]{\cH t(#1)}
+\newcommand{\IC}[1]{\cI\cC(#1)}
+\newcommand{\lp}[1]{#1_{\mathit{peak}}}
+\newcommand{\lc}[1]{#1_{\mathit{conv}}}
+\newcommand{\lcl}[1]{#1_{\mathit{cliff}}} %added by jiaxiang
+\newcommand{\lcp}[1]{#1_{\mathit{convp}}} %added by jiaxiang
+\newcommand{\lcc}[1]{#1_{\mathit{convc}}} %added by jiaxiang
+
+\newcommand{\equivp}[2]{~\equiv^{#1}_{#2}~}
+\newcommand{\repl}{{\cR}epl}
+
+%\newcommand{\RT}{R_{{\textsc{t}\xspace}}}
+%\newcommand{\RNT}{R_{{\textsc{nt}\xspace}}}
+
+%labelled rewriting
+%Optional Args 1: position, 2:label, 3:rule or rule set, 4:substitution.
+\newcommand{\lablrps}[4]{\mathop{\longrightarrow}^{#1,#2}_{#3,#4}}
+\newcommand{\dlablrps}[4]{\displaystyle \lablrps{#1}{#2}{#3}{#4}}
+\newcommand{\lablrpps}[4]{\mathop{\Longrightarrow}^{#1,#2}_{#3,#4}}
+\newcommand{\dlablrpps}[4]{\displaystyle \lablrpps{#1}{#2}{#3}{#4}}
+
+% rewriting
+%% \newcommand{\lrps}[2]{{\mathop{\longrightarrow}^{#1}_{#2}}}
+\newcommand{\lrps}[2]{\mathrel{\ra^{#1}_{#2}}} % new def
+\newcommand{\llrps}[2]{~\lrps{#1}{#2}~}
+\newcommand{\dlrps}[2]{\displaystyle \lrps{#1}{#2}}
+\newcommand{\dllrps}[2]{\displaystyle \llrps{#1}{#2}}
+%% \newcommand{\rlps}[2]{{^{~#1}_{#2}\!\!\mathop{\longleftarrow}}}
+%%\newcommand{\rlps}[2]{\mathrel{\prescript{#1\!\!\;}{#2}{\!\!\;\la}}} % new def
+%% \newcommand{\rlps}[2]{\mathrel{\myprescript{#1\!\!\;}{#2}{\!\!\;\la}}} % new def
+\newcommand{\rlps}[2]{\mathrel{\!\tensor*[^{#1\!\!\;}_{#2}]{\!\!\;\la}{}}} % new def
+\newcommand{\lrlps}[2]{~\rlps{#1}{#2}~}
+\newcommand{\rlpsbis}[2]{\mathop{\longleftarrow}^{\,#1}_{#2}}
+\newcommand{\drlps}[2]{{\displaystyle \rlpsbis{#1}{#2}}}
+\newcommand{\dlrlps}[2]{~\drlps{#1}{#2}~}
+\newcommand{\Lrps}[2]{\mathrel{\Rightarrow^{#1}_{#2}}} % new def
+\newcommand{\Rlps}[2]{\mathrel{\prescript{#1\!\!\;}{#2}{\!\!\;\Leftarrow}}} % new def
+
+%\newcommand{\DLrps}[2]{\mathop{\Longrightarrow}^{#1}_{#2}}
+%\newcommand{\TLrps}[2]{\mathop{\Longrightarrow\!\!\succ}^{#1}_{#2}}
+
+% parallel rewriting
+%\newcommand{\llrpps}[2]{~\Lrps{#1}{#2}~}
+%\newcommand{\Rlps}[2]{\mathop{\Longleftarrow}^{#1}_{#2}}
+%\newcommand{\lrlpps}[2]{~\Rlps{#1}{#2~}}
+
+%% symmetric closures
+\newcommand{\eqps}[2]{\mathrel{\lra^{#1}_{#2}}} % new def
+\makeatletter
+\newcommand{\shorteq}{%
+  \settowidth{\@tempdima}{-}% Width of hyphen
+  \resizebox{\@tempdima}{\height}{=}%
+}
+\makeatother
+%% \newcommand{\eqpseq}[2]{{\mathop{\:\;{\tiny =}\:\!\!\!\!\!\!\!\!\!\!\!\longleftrightarrow}^{#1}_{#2}}}
+\newcommand{\eqpseq}[2]{\mathrel{\mathrel{\lra\!\!\!\!\!\!\!\:\shorteq\,\,}^{#1}_{#2}}} % new def 
+\newcommand{\deqpseq}[2]{\displaystyle \eqpseq{#1}{#2}}
+
+%% \newcommand{\conv}[2]
+%%            {{\mathop{\la\!\!\!\!\!\longleftrightarrow\!\!\!\!\!\ra}^{#1}_{#2}}}
+\newcommand{\conv}[2]{\mathrel{\la\!\!\!\!\!\lra\!\!\!\!\!\ra^{#1}_{#2}}} % new def
+\newcommand{\lconv}[2]{~\conv{#1}{#2}~}
+\newcommand{\dconv}[2]{\displaystyle \conv{#1}{#2}}
+\newcommand{\dlconv}[2]{~\dconv{#1}{#2}~}
+%\newcommand{\conv}[1]{\displaystyle \convv{#1}}
+
+
+%% reflexive closures
+%% \newcommand{\lrpseq}[2]{{\mathop{\longrightarrow\!\!\!\!\!\!\!{\tiny =}}^{#1}_{#2}}}
+\newcommand{\lrpseq}[2]{\mathrel{\mathrel{\ra\!\!\!\!\!\!\:\shorteq\,}^{#1}_{#2}}} % new def
+\newcommand{\llrpseq}[2]{~\lrpseq{#1}{#2}~}
+\newcommand{\dlrpseq}[2]{\displaystyle \lrpseq{#1}{#2}}
+\newcommand{\dllrpseq}[2]{\displaystyle \llrpseq{#1}{#2}}
+%% \newcommand{\rlpseq}[2]{{~^{~#1}_{#2}\mathop{\!{\tiny =}\!\!\!\!\!\!\!\longleftarrow}}}
+\newcommand{\rlpseq}[2]{\mathrel{\prescript{#1\!\!\;}{#2}{\;\!\shorteq\!\!\!\!\!\!\:\la}}} % new def
+\newcommand{\lrlpseq}[2]{~\rlpseq{#1}{#2}~}
+\newcommand{\rlpseqis}[2]{\mathop{{\tiny =}\!\!\!\!\!\!\!\longleftarrow}^{#1}_{#2}}
+\newcommand{\drlpseq}[2]{\,{\displaystyle \rlpseqis{#1}{#2}}}
+\newcommand{\dlrlpseq}[2]{~\drlpseq{#1}{#2}~}
+%\newcommand{\lrppseq}[1]{\mathop{\Longrightarrow\!\!\!\!\!\!\!{\tiny =}}^{#1}}
+%\newcommand{\rlppseq}[1]{\mathop{{\tiny =}\!\!\!\!\!\!\!\Longleftarrow}^{#1}}
+
+
+%% derivations
+%% \newcommand{\lrder}[2]{{\mathop{\longrightarrow\!\!\!\!\!\ra}^{#1}_{#2}}}
+\newcommand{\lrder}[2]{\mathrel{\ra\!\!\!\!\!\ra^{#1}_{#2}}} % new def
+\newcommand{\llrder}[2]{~\lrder{#1}{#2}~}
+\newcommand{\dlrder}[2]{\displaystyle \lrder{#1}{#2}}
+\newcommand{\dllrder}[2]{~\dlrder{#1}{#2}~}
+%% \newcommand{\rlder}[2]{{~^{~#1}_{#2}\!\!\mathop{\la\!\!\!\!\!\longleftarrow}}}
+\newcommand{\rlder}[2]{\mathrel{\prescript{#1\!\!\;}{#2}{\!\!\;\la\!\!\!\!\!\la}}} % new def
+\newcommand{\lrlder}[2]{~\rlder{#1}{#2}~}
+\newcommand{\rlderis}[2]{\mathop{\la\!\!\!\!\!\longleftarrow}^{~#1}_{#2}}
+\newcommand{\drlder}[2]{{\displaystyle \rlderis{#1}{#2}}}
+\newcommand{\dlrlder}[2]{~\drlder{#1}{#2}~}
+
+\newcommand{\ordt}{\mbox{$\succ\!\!\succ$}}
+\newcommand{\geordt}{\mbox{$\succeq\!\!\succeq$}}
+
+%% others
+\newcommand{\LrpsD}{\Longrightarrow_\cD}
+\newcommand{\RlpsD}{_\cD\!\!\Longleftarrow}
+
