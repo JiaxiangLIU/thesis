@@ -18,6 +18,7 @@
 当给定一个词汇表和一个\emph{变量（符号）}集合时，我们可以采用如下归纳方式来定义一个项表达式的集合。
 
 \begin{definition}[项表达式]
+\label{d:term}
 假定一个词汇表$\cF$和一个可数的变量（符号）集合$\cX$，由$\cF$和$\cX$构建的项表达式集合$\TFX$由以下语法规则定义：
 \begin{eqnarray}
     \TFX & ::= & x ~\mid~ f^{(n)}(t_1,t_2,\ldots,t_n) \nonumber 
@@ -42,8 +43,10 @@
 为了记号简洁，对于任意一元函数符号$f^{(1)}\in\cF$，我们定义
 \begin{eqnarray}
     f^0(t) & \defeq & t \, ,     \nonumber \\
-    f^{n+1}(t) & \defeq & f(f^n(t)) \mbox{，其中$n\ge 0$，$t\in\TFX$。} \nonumber 
+    f^{n+1}(t) & \defeq & f(f^n(t)) \, ,\nonumber 
 \end{eqnarray}
+其中$n\ge 0$，$t\in\TFX$。
+
 因此在例~\ref{e:nat} 中，$\s(\zero)$可简写成$\s^1(\zero)$，代表自然数$1$；$\s(\s(\zero))$可简写成$\s^2(\zero)$，代表自然数$2$。
 
 一个项表达式$t$可以看作是一棵带标记的有序树，它的叶子结点被变量或常数标记，它的分支结点被元数不为零的函数符号标记。

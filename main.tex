@@ -14,6 +14,12 @@
 \usetikzlibrary{arrows.meta} 
 \usepackage{tensor}
 \usepackage{xspace}
+\usepackage{alltt}
+\usepackage{pdflscape}
+\usepackage[boxed]{algorithm2e}
+\usepackage{mathpartir}
+
+
 %\usepackage{amsmath,amssymb,latexsym} 
 %\usepackage{stmaryrd}
 
@@ -27,6 +33,7 @@
 
 \newcommand{\hide}[1]{\ignorespaces}
 \newcommand{\todo}[1]{\textbf{TODO: } #1}
+\renewcommand{\algorithmcfname}{算法}
 
 \newcommand{\zero}{\operatorname{\mathsf{zero}}}
 \newcommand{\s}{\operatorname{\mathsf{s}}}
@@ -45,12 +52,18 @@
 \newcommand{\comp}{\operatorname{\mathsf{::}}}
 \newcommand{\clock}{\operatorname{\mathsf{clock}}}
 \newcommand{\broken}{\operatorname{\mathsf{broken}}}
+\newcommand{\myempty}{\operatorname{\mathsf{empty}}}
 
 \newcommand{\defeq}{\ensuremath{\stackrel{\text{\tiny def}}{=}}}
 \newcommand{\nf}[2]{{#1}\!\da_{#2}\xspace}
 \newcommand{\RE}{\cR_{\cE}}
 \newcommand{\SE}{\cS_{\cE}}
 \newcommand{\RSE}{\cR_{\cS\cE}}
+\newcommand{\VP}{\cV_{\cP}}
+\newcommand{\Vsym}{\cV_{sym}}
+\newcommand{\pta}{\hookrightarrow}
+\newcommand{\ty}{\texttt{ty}}
+\newcommand{\transto}{\rightsquigarrow}
 
 
 
@@ -101,9 +114,9 @@
 %%\include{data/ack}
 
 %% 附录
-%\begin{appendix}
-%\input{data/appendix01}
-%\end{appendix}
+\begin{appendix}
+\input{data/appendix}
+\end{appendix}
 
 %% 个人简历
 %%\include{data/resume}
