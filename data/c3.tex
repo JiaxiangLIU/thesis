@@ -11,7 +11,7 @@
 
 嵌入式系统的其中一个特点是具有高度并发性，这主要体现在三个方面。第一，由于嵌入式系统通常由硬件与软件协同完成其功能，硬件系统所具有的并发性不可忽视。其次，由于现在的嵌入式系统处理单元逐渐变得强大，使得嵌入式软件日趋复杂。软件部分不仅仅限于完成单一任务，而且还可以搭载操作系统对复杂任务进行协调调度。软件部分的多线程进一步增加了嵌入式系统的并发性。第三，大型嵌入式系统一般由多层次构成，底层系统作为上层系统的一部分，与其它嵌入式系统协作共同完成复杂的功能。这造成了系统层面的并发性。
 
-作为自带并发语义的一种形式化模型，重写模型及其扩展在近年来作为一种系统建模模型受到越来越多的关注，被应用到硬件描述、网络协议、安全协议等领域中。若要将其应用到嵌入式系统的建模与验证工作中，需要面临两方面的挑战：
+作为自带并发语义的一种形式化模型，重写模型及其扩展在近年来作为一种系统建模模型受到越来越多的关注，被应用到硬件描述、网络协议、安全协议等领域中~\cite{DBLP:journals/jlp/Meseguer12,DBLP:journals/iandc/MeseguerR13}。若要将其应用到嵌入式系统的建模与验证工作中，需要面临两方面的挑战：
 \begin{enumerate}
 \item \textbf{建模方法：} 与基于状态的形式化模型（如自动机）不同，重写模型是基于抽象的项表达式与规则的。如何将重写模型的这些抽象元素与嵌入式系统的状态及行为一一对应起来，需要一套系统的建模方法进行指导。
 \item \textbf{工具支持：} 在根据建模方法对嵌入式系统进行建模，得到其对应的重写模型后，我们需要一套工具支持该模型的分析与验证，否则建模的初衷将变得毫无意义。
@@ -23,13 +23,13 @@
 
 
 \section{相关工作}
-\label{s:modeling-related}
+\label{s:modeling-related} 
 
-重写模型作为一种抽象的计算模型，长期以来被作为底层技术应用于定理证明器、函数式编程语言、SMT 求解器等领域中。近年来，重写模型开始作为一种建模模型得到关注，并被应用于系统验证的工作中。
+重写模型作为一种抽象的计算模型，长期以来被作为底层技术应用于定理证明器、函数式编程语言、SMT 求解器等领域中~\cite{assaf16a,DBLP:conf/lics/JouannaudO91,DBLP:conf/cav/Nadel14}。近年来，重写模型开始作为一种建模模型得到关注，并被应用于系统验证的工作中。
 
-Bluespec 是一种基于条件重写模型的硬件描述语言。由于重写本身所具有的并发性，Bluespec 十分适用于硬件的并发行为描述。相比于 VHDL、Verilog 等传统硬件描述语言，Bluespec 以一种更加抽象的方式对目标系统行为进行描述，有效提高了硬件开发效率。同时，由于 Bluespec 语言在条件重写模型的基础上支持 Haskell 的类型定义，使其对复杂类型、自定义类型的支持更加丰富。利用 Bluespec 语言编写的硬件模型支持仿真的方式进行模型验证，Singh 和 Shukla 也提出了一套方法将 Bluespec 模型转换成 PROMELA 模型并用模型检测工具 SPIN 对其进行形式化验证~\cite{DBLP:conf/mtv/SinghS07}。同时，Braibant 和 Chlipala 也提出利用交互式定理证明工具 Coq 对 Bluespec 的一个子集进行形式化验证~\cite{DBLP:conf/cav/BraibantC13}。 由于 Bluespec 是专门针对硬件设计的建模语言，因此它无法描述顺序执行的软件行为。 
+Bluespec 是一种基于条件重写模型的硬件描述语言~\cite{nikhil2008bluespec}。由于重写本身所具有的并发性，Bluespec 十分适用于硬件的并发行为描述。相比于 VHDL、Verilog 等传统硬件描述语言，Bluespec 以一种更加抽象的方式对目标系统行为进行描述，有效提高了硬件开发效率。同时，由于 Bluespec 语言在条件重写模型的基础上支持 Haskell 的类型定义，使其对复杂类型、自定义类型的支持更加丰富。利用 Bluespec 语言编写的硬件模型支持仿真的方式进行模型验证，Singh 和 Shukla 也提出了一套方法将 Bluespec 模型转换成 PROMELA 模型~\cite{DBLP:journals/cn/Holzmann93} 并用模型检测工具 SPIN~\cite{DBLP:journals/tse/Holzmann97} 对其进行形式化验证~\cite{DBLP:conf/mtv/SinghS07}。同时，Braibant 和 Chlipala 也提出利用交互式定理证明工具 Coq 对 Bluespec 的一个子集进行形式化验证~\cite{DBLP:conf/cav/BraibantC13}。 由于 Bluespec 是专门针对硬件设计的建模语言，因此它无法描述顺序执行的软件行为。 
 
-重写逻辑是针对建模与验证设计的一种重写模型扩展。基于重写逻辑实现的语言及工具集 Maude，以及其针对实时系统的扩展 Real-Time Maude，支持模型仿真、可达性验证、模型检测、交互式定理证明等多种验证手段。由于重写模型的并发特点，Maude 主要被应用于生物信息、安全协议、通信协议等系统的建模与验证。Maude 的应用案例为基于重写模型的建模工作确立了一套方法框架：项表达式用于建模系统状态，重写规则用于建模系统行为。 Maude 也被尝试用于软件和嵌入式系统的建模与验证工作中。由于重写逻辑在模型层面也不支持确定性行为的表达，因此软件的顺序执行行为只能通过两种方式进行描述：(i) 利用重写规则进行模拟，这将显式地增加重写模型的状态空间（可达项表达式的空间），为后端的验证过程带来困难；(ii) 利用等式规则进行模拟，这可能导致重写过程不可判定，且这种建模方式使等式规则的语义不明确。
+重写逻辑~\cite{DBLP:journals/tcs/Marte-OlietM02,DBLP:journals/jlp/Meseguer12} 是针对建模与验证设计的一种重写模型扩展。基于重写逻辑实现的语言及工具集 Maude~\cite{DBLP:journals/tcs/ClavelDELMMQ02}，以及其针对实时系统的扩展 Real-Time Maude~\cite{DBLP:journals/lisp/OlveczkyM07}，支持模型仿真、可达性验证、模型检测、交互式定理证明等多种验证手段。由于重写模型的并发特点，Maude 主要被应用于生物信息、安全协议、通信协议等系统的建模与验证~\cite{DBLP:journals/jlp/Meseguer12,DBLP:journals/iandc/MeseguerR13}。Maude 的应用案例为基于重写模型的建模工作确立了一套方法框架：项表达式用于建模系统状态，重写规则用于建模系统行为~\cite{DBLP:conf/maude/2007}。 Maude 也被尝试用于软件和嵌入式系统的建模与验证工作中~\cite{DBLP:journals/scp/BaeKMO15}。由于重写逻辑在模型层面也不支持确定性行为的表达，因此软件的顺序执行行为只能通过两种方式进行描述：(i) 利用重写规则进行模拟，这将显式地增加重写模型的状态空间（可达项表达式的空间），为后端的验证过程带来困难；(ii) 利用等式规则进行模拟，这可能导致重写过程不可判定，且这种建模方式使等式规则的语义不明确。
 
 本文在上一章提出的规范化条件重写模型，在模型层次将确定性行为和非确定性行为进行区分，目的就是解决在嵌入式系统建模的过程中，如何对软件的顺序行为进行建模的问题。
 
@@ -52,7 +52,7 @@ Bluespec 是一种基于条件重写模型的硬件描述语言。由于重写�
 \subsection{建模框架}
 
 \subsubsection{系统状态建模}
-对于系统建模，首先需要提到的是如何对系统状态进行建模。对于基于状态的模型（比如状态机、状态变迁系统）来说，系统的状态可以对应为模型的状态，这比较易于理解。而对于基于项表达式和规则的重写模型来说，系统状态则需要通过项表达式来进行建模。
+对于系统建模，首先需要提到的是如何对系统状态进行建模。对于基于状态的模型（比如自动机等）来说，系统的状态可以对应为模型的状态，这比较易于理解。而对于基于项表达式和规则的重写模型来说，系统状态则需要通过项表达式来进行建模。
 
 具体地说，在基于重写模型进行系统建模时，我们通过定义函数符号来对我们所关心的系统元素（如变量、状态等）进行“编码”。通过人为地给函数符号及其每一个参数赋予语义，来给每一个项表达式赋予语义。比如在例~\ref{e:river} 中，我们规定函数符号 $\farmer$、$\wolf$、$\lamb$、$\grass$ 各自表示农夫、狼、羊、草当前所处的状态，而它们的第一个参数则表示当前该对象处于河的哪一侧。我们又规定函数符号 $\lhs$和$\rhs$ 分别表示河的左岸和右岸，于是项表达式 $\farmer(\lhs) \comp \lamb(\lhs) \comp \wolf(\rhs) \comp \grass(\lhs)$ 就可以用于表示系统的某个状态，该状态为农夫在左岸、羊在左岸、狼在右岸、草在左岸。又比如在例~\ref{e:clock} 中，我们规定函数符号 $\clock$ 表示一个时钟当前的状态，而它的第一个参数表示该时钟当前的读数。而我们又给 $\s$ 和 $\zero$ 赋予了自然数的语义，于是项表达式 $\clock(\s^3(\zero))$ 就可以表示系统的某个状态，该状态的时钟读数为3。
 
@@ -135,19 +135,19 @@ Bluespec 是一种基于条件重写模型的硬件描述语言。由于重写�
 
 异步事件触发的行为可以抽象地拆解成两个行为：组件1触发事件A，事件A使组件2的状态发生变化。如果将事件A也看作系统中的一个子组件，则这两个行为可以看作是两个同步行为。
 
-下面举个例子说明。假设组件1的状态可以从$a$变成$b$，从$b$变成$c$，从$c$变成$d$；当它从状态$b$变成状态$c$时，同时会给系统中的组件2发送一个消息$m$。假设组件2在状态$e$会等待从组件1发送过来的消息$m$；收到消息后状态会变成$g$。那么我们将组件1和组件2之间用于传输消息$m$的信道也作为系统的一个组件进行考虑。定义三元函数符号 $f^{(3)}$ 用于建模系统状态，它的第一个参数表示组件1的状态，第二个参数表示信道的状态，第三个参数表示组件2的状态。于是我们可以用以下规则来对上述异步行为进行描述：
+下面举个例子说明。假设组件1的状态可以从 $a$ 变成 $b$，从 $b$ 变成 $c$，从 $c$ 变成 $d$；当它从状态 $b$ 变成状态 $c$ 时，同时会给系统中的组件2发送一个消息 $m$。假设组件2在状态 $e$ 会等待从组件1发送过来的消息 $m$；收到消息后状态会变成 $g$。那么我们将组件1和组件2之间用于传输消息 $m$ 的信道也作为系统的一个组件进行考虑。定义三元函数符号 $f^{(3)}$ 用于建模系统状态，它的第一个参数表示组件1的状态，第二个参数表示信道的状态，第三个参数表示组件2的状态。于是我们可以用以下规则来对上述异步行为进行描述：
 \begin{eqnarray}
  a & \ra_1 & b \nonumber \\
  f(b,x,y) & \ra_2 & f(c,m,y) \nonumber \\
  c & \ra_3 & d \nonumber \\
  f(x,m,e) & \ra_4 & f(x,\myempty,g) \;\mbox{，} \nonumber
 \end{eqnarray}
-其中函数符号$\myempty$表示信道中无消息。 规则2是组件1和信道组件的同步行为，它表示“组件1的状态从$b$变成$c$”这个动作必须和“信道中有消息$m$出现”这个动作同时发生。而规则4则是信道组件和组件2的同步行为，它表示“信道中的消息$m$消失”这个动作必须与“组件2的状态从$e$变成$g$”这个动作同时发生。规则2和规则4是典型的异步行为建模规则。由上述规则可以产生如下重写序列：
+其中函数符号 $\myempty$ 表示信道中无消息。 规则2是组件1和信道组件的同步行为，它表示“组件1的状态从 $b$ 变成 $c$”这个动作必须和“信道中有消息 $m$ 出现”这个动作同时发生。而规则4则是信道组件和组件2的同步行为，它表示“信道中的消息 $m$ 消失”这个动作必须与“组件2的状态从 $e$ 变成 $g$”这个动作同时发生。规则2和规则4是典型的异步行为建模规则。由上述规则可以产生如下重写序列：
 \begin{eqnarray}
 & & f(a,\myempty,e)  \ra  f(b,\myempty,e) 
   \ra f(c,m,e) \ra f(d,m,e)  \ra f(d,\myempty,g) \;\mbox{。} \nonumber
 \end{eqnarray}
-该序列表明，组件1向组件2发出消息$m$后，不需等待组件2的响应，即可继续运行（从状态$c$变成状态$d$）。
+该序列表明，组件1向组件2发出消息 $m$ 后，不需等待组件2的响应，即可继续运行（从状态 $c$ 变成状态 $d$）。
 
 
 \subsection{组件并发}
@@ -247,7 +247,7 @@ att_1\texttt{:}val_1\texttt{,} \ldots
 其中，$O$ 是该对象的\emph{标识}（Identifier），具有类型 \verb|Oid|；
 $val_i$ 是属性 $att_i$ 的值。所有类的对象都具有类型 \verb|Object|。重写规则可以针对某个类的项表达式进行定义。\emph{子类}（Subclass）可以继承其父类的所有类属性以及相关的重写规则。
 
-Real-Time Maude~\cite{DBLP:journals/lisp/OlveczkyM07} 是 Maude 的一个扩展，它同时给 Maude 语言和工具集增加了新功能。它主要的目的是让Maude可以用于给实时系统建模和分析验证。在Maude的基础上，Real-Time Maude 内置了一个名为“\verb|Time|”的描述时间的模块。在 Maude 模块的基础上，Real-Time Maude 在集合 $\mathit{R}$ 中加入了\emph{带标签的单元计时规则}（Labeled tick rule）。单元计时规则具有以下形式
+Real-Time Maude~\cite{DBLP:journals/lisp/OlveczkyM07} 是 Maude 的一个扩展，它同时给 Maude 语言和工具集增加了新功能。它主要的目的是让 Maude 可以支持实时系统的建模和分析验证。在Maude的基础上，Real-Time Maude 内置了一个名为“\verb|Time|”的描述时间的模块。在 Maude 模块的基础上，Real-Time Maude 在集合 $\mathit{R}$ 中加入了\emph{带标签的单元计时规则}（Labeled tick rule）。单元计时规则具有以下形式
 \begin{eqnarray}
 & & [l]~:~\{s\}\rightarrow\{s'\} \mbox{\textbf{ in time}
   }r\mbox{ \textbf{if} }cond \;\; , \nonumber
@@ -257,9 +257,9 @@ Real-Time Maude~\cite{DBLP:journals/lisp/OlveczkyM07} 是 Maude 的一个扩展�
 需要注意，Maude 面向对象风格的模型以及其扩展 Real-Time Maude 都只是一种语法封装，它们的底层还是基于重写理论 $\mathcal{R^L}$ 和重写逻辑。 
 
 \subsubsection{模型分析及形式化验证}
-给定一个模型（重写理论），Maude 和 Real-Time Maude 给用户提供了许多配套工具对模型进行分析。例如，\verb|rewrite| 指令可以符号化地、抽象地执行目标模型，在模型的层次上对系统进行仿真；给定一个初始状态（用项表达式表示），\verb|search| 指令可以搜索所有可达的状态，从中判断是否存在满足指定性质的状态；Maude 配套的\emph{交互式定理证明器}（Inductive Theorem Prover，简称“ITP”）可以通过交互式的方法，用于证明模型具有的等词逻辑性质。
+给定一个模型（重写理论），Maude 和 Real-Time Maude 给用户提供了许多配套工具对模型进行分析。例如，\verb|rewrite| 指令可以符号化地、抽象地执行目标模型，在模型的层次上对系统进行仿真；给定一个初始状态（用项表达式表示），\verb|search| 指令可以搜索所有可达的状态，从中判断是否存在满足指定性质的状态；Maude 配套的\emph{交互式定理证明器}~\cite{DBLP:journals/jucs/ClavelPR06}（Inductive Theorem Prover，ITP）可以通过交互式的方法，用于证明模型具有的等词逻辑性质。
 
-在本文中，我们更关心的是 Real-Time Maude 配套的形式化验证工具：\emph{线性时序逻辑模型检测器}~\cite{clarke1999model}（Linear Temporal Logic model checker，简称“LTL模型检测器”）。
+在本文中，我们更关心的是 Real-Time Maude 配套的形式化验证工具：\emph{线性时序逻辑模型检测器}~\cite{DBLP:journals/entcs/EkerMS02}（Linear Temporal Logic model checker，简称“LTL模型检测器”）。
 它可以检查是否模型中的\emph{任意}一条行为路径都满足给定的时序逻辑公式。
 \emph{状态命题}（State proposition）被定义为具有类型 \verb|Prop| 的项表达式。
 它们的语义由集合 $\mathit{E}$ 中以下形式的条件等式进行规定：
@@ -278,6 +278,7 @@ Real-Time Maude~\cite{DBLP:journals/lisp/OlveczkyM07} 是 Maude 的一个扩展�
 
 
 \subsection{建模框架实现} 
+\label{ss:method-impl}
 
 如果将重写理论 $\mathcal{R^L} = \lb \Sigma, A, E, R\rb$ 的 $\Sigma$、$A$、$E$、$R$ 分别与规范化（条件）重写模型 $\RSE = \lb \cR,\cS,\cE\rb$ 的 $\cF$、$\cE$、$\cS$、$\cR$ 对应起来，两者存在许多相似之处，然而它们的主要区别在于：
 \begin{enumerate}[(i)]
@@ -322,7 +323,7 @@ Real-Time Maude~\cite{DBLP:journals/lisp/OlveczkyM07} 是 Maude 的一个扩展�
 \label{alg:convert}
 \end{algorithm}
 
-所以，本文提出算法~\ref{alg:convert}，将（部分）规范化重写模型转换为重写理论。转换的关键点在于。重写理论的集合 $A$ 所支持的（等式）性质不如规范化重写模型的集合 $\cE$ 一般化，因此对于 $\cE$ 中不被支持的等式规则，需要将其进行有向化，转换成重写规则放入集合 $E$。所以该算法转换成功与否的关键，就在于有向化后的规则集 $\vec{\cE'}$ 能否满足重写理论对集合 $E$ 的要求，即必须是终止且合流的。
+所以，本文提出算法~\ref{alg:convert}，将（部分）规范化重写模型转换为重写理论。转换的关键点在于：重写理论的集合 $A$ 所支持的（等式）性质不如规范化重写模型的集合 $\cE$ 一般化，因此对于 $\cE$ 中不被支持的等式规则，需要将其进行有向化，转换成重写规则放入集合 $E$。所以该算法转换成功与否的关键，就在于有向化后的规则集 $\vec{\cE'}$ 能否满足重写理论对集合 $E$ 的要求，即必须是终止且合流的。
 
 基于算法~\ref{alg:convert}，我们将小节~\ref{s:modeling} 提出的建模方法在 Maude 中予以实现，并通过两个真实应用案例（小节~\ref{s:TO} 和小节~\ref{s:RMS}），验证它的可行性。 
 
@@ -331,7 +332,7 @@ Real-Time Maude~\cite{DBLP:journals/lisp/OlveczkyM07} 是 Maude 的一个扩展�
 \section{应用案例：铁路机车节能优化控制系统}
 \label{s:TO}
 
-铁路机车节能优化控制系统~\cite{DBLP:journals/tc/HuangDYS16}（以下简称“优化控制系统”）是由清华大学软件学院智能交通实验室与中车信息技术有限公司合作开发的一套铁路机车智能巡航控制与节能产品，用以辅助司机通过自动控制机车来最大限度降低机车的能耗。该系统对机车进行控制的过程中涉及到自动控制与司机手动控制状态的转换。本小节利用 Maude 工具对该系统的状态转换逻辑进行建模和形式化验证。通过建模过程和验证方法的应用，我们定位了系统中的若干缺陷，并与开发人员进行了确认，帮助开发人员进行修复。
+铁路机车节能优化控制系统~\cite{DBLP:journals/tc/HuangDYS16}（以下简称“优化控制系统”）是由清华大学软件学院智能交通实验室与中车信息技术有限公司合作开发的一套铁路机车智能巡航控制与节能产品，用以辅助司机通过自动控制机车来最大限度降低机车的能耗。该系统对机车进行控制的过程中涉及到自动控制与司机手动控制状态的转换。本小节基于第~\ref{s:modeling} 小节提出的建模方法，利用 Maude 工具对该系统的状态转换逻辑进行建模和形式化验证。通过建模过程和验证方法的应用，我们定位了系统中的若干缺陷，并与开发人员进行了确认，帮助开发人员进行修复。
 
 \subsection{背景介绍}
 
@@ -538,7 +539,7 @@ Real-Time Maude~\cite{DBLP:journals/lisp/OlveczkyM07} 是 Maude 的一个扩展�
 
 %\usepackage{microtype}
 
-\emph{速率单调调度}（Rate-monotonic scheduling，简称RMS）是在工业应用中最重要的实时调度算法之一。针对速率单调调度（以下简称“RMS”），特别是针对RMS的\emph{可调度性}（Schedulability），学术界和工业界对其进行了深入的研究并取得大量成果。然而，针对RMS的理论研究仅仅停留在算法的抽象层面上，当面对一个实际存在的RMS系统实现时，这些理论研究成果由于不包含对实现细节的考虑而无法直接应用到RMS系统的分析中。另一方面，除了可调度性以外，RMS系统实现的\emph{正确性}（Correctness）也是开发人员及用户十分关心的问题。
+\emph{速率单调调度}~\cite{DBLP:journals/jacm/LiuL73}（Rate-Monotonic Scheduling，RMS）是在工业应用中最重要的实时调度算法之一。针对RMS，特别是针对RMS的\emph{可调度性}（Schedulability），学术界和工业界对其进行了深入的研究并取得大量成果。然而，针对RMS的理论研究仅仅停留在算法的抽象层面上，当面对一个实际存在的RMS系统实现时，这些理论研究成果由于不包含对实现细节的考虑而无法直接应用到RMS系统的分析中。另一方面，除了可调度性以外，RMS系统实现的\emph{正确性}（Correctness）也是开发人员及用户十分关心的问题。
 
 本小节利用Real-Time Maude工具对一个真实的RMS系统实现进行建模和验证。在模型中，我们考虑了系统开销以及硬件平台的部分细节。我们对该RMS系统的可调度性和实现正确性进行了形式化验证，并证明了我们的验证方法具有\emph{可靠性}（Soundness）和\emph{完备性}（Completeness）。
 
@@ -964,8 +965,8 @@ $\mathit{schedule()}$ 对链表$\mathit{taskList}$进行遍历，对就绪的任
 值得注意的是，得益于 Real-Time Maude 丰富的表达能力，对不同的任务集合，我们只需要定义不同的初始状态（类型为 \verb|System|）即可，不需要对模型本身进行修改和调整。
 
 \begin{landscape}
-\begin{figure}
-\centering
+\begin{figure} 
+\centering 
 \includegraphics[width=1.5\textwidth]{FIG3_15-TIE-3480.pdf}
 \caption{场景 (iv) 可调度性的反例}
 \label{f:counterexample}
@@ -1047,287 +1048,3 @@ Katcher 等人基于几种主流的RMS实现方法，在他们的可调度性分
 \section{本章小结}
 
 本章基于已有的重写逻辑建模验证工作，针对嵌入式系统的特性，如层次化、硬软件协同工作等，提出了基于规范化条件重写模型的建模方法。通过模型层面的语义映射，我们将该建模方法在工具集 Maude 中予以实现。利用该建模方法，我们对两个真实的嵌入式系统——机车优化控制系统和速率单调调度系统进行了建模。对于前者，我们应用了测试与验证结合的方法，成功发现系统中的潜在缺陷；而对于后者，我们应用模型检测技术对系统的可调度性和正确性进行了形式化验证，并证明了其结果具有可靠性和完备性。这两个应用案例表明了本章提出的建模方法在实际应用中具有可行性。
-
-\hide{
-\appendix[Proof of Theorem~\ref{t:main}]
-\label{a:proof}
-\setcounter{theorem}{0}
-\renewcommand{\thetheorem}{\thesection.\arabic{theorem}}
-\newcommand{\lrps}[2]{\rightarrow^{#1}_{#2}}
-
-We show here a detailed proof of Theorem~\ref{t:main}.
-
-Some more preliminaries from~\cite{DBLP:journals/entcs/OlveczkyM07a}
-are needed. A term $t$ is called \emph{ground} if it contains no
-variables. For a set $P\subseteq AP$ of atomic propositions and ground
-terms $t,t'$, we write $t\simeq_P t'$ (or $t\simeq t'$ for simplicity
-when $P$ is implicit) if $t$ and $t'$ satisfy exactly the same set of
-propositions from $P$.
-
-Time-robustness is a set of properties expected from a well-behaved
-real-time rewrite theory. We avoid introducing the accurate definition
-of time-robustness, but instead give the following lemma to prove
-time-robustness:
-\begin{lemma}[\cite{DBLP:journals/entcs/OlveczkyM07a}]
-\label{l:timerobustness}
-Let $\mathcal{R}$ be an object-oriented specification with a standard
-tick rule, and let the infinity element \verb|INF| be the only element
-in the time domain which is not a normal time value.  Then
-$\mathcal{R}$ is time-robust if the following conditions are satisfied
-for all appropriate ground terms $t$ and $r,r'$:
-\begin{enumerate}
-\item
-[(i)] \verb|mte(delta(|$t$\verb|,|$r$\verb|))| $=$
-\verb|mte(|$t$\verb|) monus |$r$, for all $r\le$
-\verb|mte(|$t$\verb|)|, where \verb|monus| is the built-in minus
-operation defined on sort \verb|Time|;
-
-\item
-[(ii)] \verb|delta(|$t$\verb|,|$0$\verb|)| $= t$;
-
-\item
-[(iii)] \verb|delta(delta(|$t$\verb|,|$r$\verb|),|$r'$\verb|)| $=$
-\verb|delta(|$t$\verb|,|$r+r'$\verb|)|, for $r+r'\le$
-\verb|mte(|$t$\verb|)|;
-
-\item
-[(iv)] \verb|mte(|$\sigma(l)$\verb|)|$= 0$ for each ground instance
-$\sigma(l)$ of each left-hand side $l$ of an instantaneous rewrite
-rule.
-\end{enumerate}
-\end{lemma}
-
-Each one-step rewrite can be categorized and then tick-invariance can
-be defined:
-\begin{definition}[\cite{DBLP:journals/entcs/OlveczkyM07a}]
-A one-step rewrite $t\lrps{r}{1}t'$ using a tick rule and having
-duration $r$ is:
-\begin{itemize}
-\item[--] a \emph{maximal tick step}, written $t\lrps{r}{max}t'$, if
-  there is no time value $r'>r$ such that $t\lrps{r'}{1}t''$ for some
-  $t''$;
-\item[--] an \emph{$\infty$ tick step}, written $t\lrps{r}{\infty}t'$,
-  if for each time value $r'>0$, there is a tick rewrite step
-  $t\lrps{r'}{1}t''$; and
-\item[--] a \emph{non-maximal tick step} if there is a maximal tick
-  step $t\lrps{r'}{max}t''$ for $r'>r$.
-\end{itemize}
-\end{definition}
-\begin{definition}[\cite{DBLP:journals/entcs/OlveczkyM07a}]
-  A time-robust specification $\mathcal{R}$ is \emph{tick-invariant} with
-  respect to a set $P$ of propositions if and only if $t\simeq_P t'$
-  holds for each non-maximal or $\infty$ tick step $t\lrps{r}{}t'$.
-\end{definition}
-
-The following lemma is needed to prove the tick-invariance of our
-defined propositions:
-\begin{lemma}[\cite{DBLP:journals/entcs/OlveczkyM07a}]
-\label{l:tickinv}
-Let $\mathcal{R}$ be a time-robust object-oriented specification with a
-standard tick rule, and let the infinity element \verb|INF| be the
-only element in the time domain which is not a normal time value.
-Then $\mathcal{R}$ is tick-invariant with respect to a set $P$ of atomic
-propositions if \verb|{|$t$\verb|}| $\simeq_P$
-\verb|{delta(|$t$\verb|,|$r$\verb|)}| for all $t,r$ with $r<$
-\verb|mte(|$t$\verb|)|.
-\end{lemma}
-
-\newcommand{\mteTask}[2]{\texttt{mteTask(}#1\texttt{,}#2\texttt{)}}
-\newcommand{\deltaTask}[3]{\texttt{deltaTask(}#1\texttt{,}#2\texttt{,}#3\texttt{)}}
-\newcommand{\mteIS}[1]{\texttt{mteIS(}#1\texttt{)}}
-\newcommand{\deltaIS}[2]{\texttt{deltaIS(}#1\texttt{,}#2\texttt{)}}
-\newcommand{\IntSrc}[3]{\texttt{<}#1\texttt{:IntSrc|val:}#2\texttt{,cycle:}#3\texttt{>}}
-\newcommand{\mteIr}[1]{\texttt{mteIr(}#1\texttt{)}}
-\newcommand{\mteS}[1]{\texttt{mte(}#1\texttt{)}}
-\newcommand{\deltaS}[2]{\texttt{delta(}#1\texttt{,}#2\texttt{)}}
- 
-Several auxiliary lemmas are proved:
-\begin{lemma}
-\label{l:auxtask}
-Given $\mathit{ID}$ of sort \verb|MaybeNat| and $L$ of sort
-\verb|TaskList|, $\mteTask{\mathit{ID}}{\deltaTask{\mathit{ID}}{L}{r}}
-= \mteTask{\mathit{ID}}{L}\; \verb|monus|\;r$ for all
-$r\le\mteTask{\mathit{ID}}{L}$.
-\end{lemma}
-\begin{IEEEproof}
-If $\mathit{ID}=\verb|none|$, the case is trivial. By definition,
-$\mteTask{\texttt{none}}{\deltaTask{\texttt{none}}{L}{r}} =
-\mteTask{\texttt{none}}{L} = \verb|INF| =
-\mteTask{\texttt{none}}{L}\\ \verb|monus|\; r$. Otherwise,
-$\mathit{ID}= \verb|some|~N$ with $N$ of sort \verb|Nat|. Assume that
-the \verb|cnt| of the $N$th task in $L$ is
-\verb|[|$r_e$\verb|/|$C$\verb|]|. Then by definition,
-$\deltaTask{\mathit{ID}}{L}{r}=L'$, where the
-$N$th task in $L'$ has \verb|cnt| value being
-\verb|[|$(r_e+r)$\verb|/|$C$\verb|]|. Hence,
-\begin{IEEEeqnarray*}{Cl}
-  & \mteTask{\mathit{ID}}{\deltaTask{\mathit{ID}}{L}{r}}
-\\  
-= & \mteTask{\mathit{ID}}{L'}
-\\
-= & C~\verb|monus|~(r_e+r) 
-= (C~\verb|monus|~r_e)~\verb|monus|~r 
-\\
-= & \mteTask{\mathit{ID}}{L}~\verb|monus|~r\;. \hfill\IEEEQEDhere
-\end{IEEEeqnarray*}
-\end{IEEEproof}
-
-\begin{lemma}
-\label{l:auxis}
-Given $\mathit{ISRC}$ of class \verb|IntSrc| representing an
-reasonable state of interrupt source in our model,
-$\mteIS{\deltaIS{\mathit{ISRC}}{r}} = \mteIS{\mathit{ISRC}}\;
-\verb|monus|\\ r$ for all $r\le\mteIS{\mathit{ISRC}}$.
-\end{lemma}
-\begin{IEEEproof}
-A reasonable $\mathit{ISRC}$ must be of the form
-$\IntSrc{O}{v}{T}$ with $v\le T$. Thus,
-\begin{IEEEeqnarray*}{Cl}
-  & \mteIS{\deltaIS{\mathit{ISRC}}{r}}
-\\  
-= & \mteIS{\IntSrc{O}{(v~\texttt{monus}~r)}{T}}
-\\
-= & v~\texttt{monus}~r
-= \mteIS{\mathit{ISRC}}~\texttt{monus}~r\;. \hfill\IEEEQEDhere
-\end{IEEEeqnarray*}
-\end{IEEEproof}
-
-\begin{lemma}
-\label{l:auxhw}
-Given $\mathit{HW}$ of sort \verb|Hardware|, for all
-$r\le\mteIr{\mathit{HW}}$, $\mteIr{\mathit{HW}} =
-\mteIr{\mathit{HW}}\; \verb|monus|\; r$.
-\end{lemma}
-\begin{IEEEproof}
-  It concludes by discussing on whether there exists an interrupt
-  request detected in $\mathit{HW}$.
-\end{IEEEproof}
-
-Now we can present the detailed proof of Theorem~\ref{t:main}:
-\begin{IEEEproof}[Proof of Theorem~\ref{t:main}]
-We first prove the time-robustness of our model by
-Lemma~\ref{l:timerobustness}.  Instantiated on the built-in dense time
-domain \verb|POSRAT-TIME-DOMAIN-WITH-INF|, our model has \verb|INF| as
-the only element which is not a normal time value. As presented in
-Section~\ref{ss:timedbehavior}, only a single standard tick rule is
-defined. Hence our model is time-robust by
-Lemma~\ref{l:timerobustness} provided conditions (i--iv) hold.
-
-Condition~(i). We must prove \verb|mte(delta(|$s$\verb|,|$r$\verb|))|
-$=$ \verb|mte(|$s$\verb|)| \verb|monus| $r$ for all $r\le$
-\verb|mte(|$s$\verb|)|, with $s$ being a system state of sort
-\verb|System|. Let $s$ be of the form
-$(L~T~\mathit{STS}~\mathit{HW}~\mathit{ISRC})$ and
-$\mathit{ID}=\verb|(|\mathit{HW}\verb|).getPc|$. We only consider the
-case $\mathit{ID}$\verb|::MaybeNat| in detail, while the other case
-$\mathit{ID}$\verb|::Oid| is similar. By definitions of \verb|mte| and
-\verb|delta|,
-\begin{IEEEeqnarray*}{Cl}
-  & \mteS{\deltaS{s}{r}}
-\\  
-= & \mteS{\deltaTask{\mathit{ID}}{L}{r}
-\\
-  & \;\;\;\;\;\;\;\;\;T~\mathit{STS}~\mathit{HW}~\deltaIS{\mathit{ISRC}}{r}}
-\\
-= & \verb|minimum(|\mteTask{\mathit{ID}}{\deltaTask{\mathit{ID}}{L}{r}}\verb|,|
-\\
-  & \verb|        |\mteIS{\deltaIS{\mathit{ISRC}}{r}}\verb|,|
-\\
-  & \verb|        |\mteIr{\mathit{HW}}\verb|)|\;.
-\end{IEEEeqnarray*}
-By Lemmas~\ref{l:auxtask},~\ref{l:auxis} and~\ref{l:auxhw}, it can be
-further reduced:
-\begin{IEEEeqnarray*}{Cl}
-  & \mteS{\deltaS{s}{r}}
-\\  
-= & \verb|minimum(|\mteTask{\mathit{ID}}{L}~\verb|monus|~r~\verb|,|
-\\
-  & \verb|        |\mteIS{\mathit{ISRC}}~\verb|monus|~r~\verb|,|
-\\
-  & \verb|        |\mteIr{\mathit{HW}}~\verb|monus|~r~\verb|)|
-\\
-= & \verb|minimum(|\mteTask{\mathit{ID}}{L}\verb|,|
-\\
-  & \verb|        |\mteIS{\mathit{ISRC}}\verb|,|
-\\
-  & \verb|        |\mteIr{\mathit{HW}}\verb|)|~\verb|monus|~r
-\\
-= & \mteS{s}~\verb|monus|~r\;.
-\end{IEEEeqnarray*}
-
-Condition~(ii) follows from the fact that $r+0=r$ and
-$r~\verb|monus|~0=r$ for all $r$.
-
-Condition~(iii). We must prove $\deltaS{\deltaS{s}{r}}{r'}\\ =
-\deltaS{s}{r+r'}$ for all $r+r'\le\mteS{s}$, with $s$ being a system
-state of sort \verb|System|. Using the same notations as in~(i), we
-only consider the case $\mathit{ID}$\verb|::MaybeNat| in detail. By
-definition, the left side of the equation
-\begin{IEEEeqnarray*}{Cl}
-  & \deltaS{\deltaS{s}{r}}{r'}
-\\  
-= & \verb|(|\deltaTask{\mathit{ID}}{\deltaTask{\mathit{ID}}{L}{r}}{r'}
-\\
-  & \verb| |~T~\mathit{STS}~\mathit{HW}~\deltaIS{\deltaIS{\mathit{ISRC}}{r}}{r'}\verb|)|~\mbox{,}
-\end{IEEEeqnarray*}
-and the right side of the equation
-\begin{IEEEeqnarray*}{Cl}
-  & \deltaS{s}{r+r'}
-\\  
-= & \verb|(|\deltaTask{\mathit{ID}}{L}{r+r'}
-\\
-  & \verb| |~T~\mathit{STS}~\mathit{HW}~\deltaIS{\mathit{ISRC}}{r+r'}\verb|)|~\mbox{.}
-\end{IEEEeqnarray*}
-$\deltaTask{\mathit{ID}}{\deltaTask{\mathit{ID}}{L}{r}}{r'}
-=\deltaTask{\mathit{ID}}{L}{r+r'}$ holds thanks to the associativity
-of $+$, while
-$\deltaIS{\deltaIS{\mathit{ISRC}}{r}}{r'}\!=\!\deltaIS{\mathit{ISRC}}{r+r'}$
-holds since $(v\; \verb|monus|\; r)\; \verb|monus|\; r'\\ = v\;
-\verb|monus|\; (r+r')$ with $v$ of sort \verb|Time|. Thus (iii) holds.
-
-Condition~(iv). We show that \verb|mte| of each instance of the
-left-hand side of any instantaneous rule is $0$. For example,
-considering the rule \verb|interrupt-request|, with its
-condition \verb|(|$\mathit{ISRC}$\verb|).timeout|, we know that \verb|val|
-of $\mathit{ISRC}$ equals $0$. Therefore,
-\begin{IEEEeqnarray*}{Cl}
-  & \mteS{L~T~\mathit{STS}~\mathit{HW}~\mathit{ISRC}}
-\\  
-= & \verb|minimum(|\mteTask{\mathit{ID}}{L}\verb|,|
-\\
-  & \verb|        |\mteIS{\mathit{ISRC}}\verb|,| \mteIr{\mathit{HW}}\verb|)|
-\\
-= & \verb|minimum(|\mteTask{\mathit{ID}}{L}\verb|,|~0~\verb|,| \mteIr{\mathit{HW}}\verb|)|
-\\
-= & 0~\mbox{.}
-\end{IEEEeqnarray*}
-The other rules can be similarly proved with their conditions. Hence
-our model is time-robust by Lemma~\ref{l:timerobustness}.
-
-Finally we prove the tick-invariance of the propositions used to
-analyze our model, i.e.\ \verb|taskTimeout| and \verb|correct|. By
-Lemma~\ref{l:tickinv}, we must prove
-$\verb|{|s\verb|}|\simeq_P\verb|{|\deltaS{s}{r}\verb|}|$ with $s$ of
-sort \verb|System| and $r<\mteS{s}$, that is, applying a tick rule
-advancing $r$ time units will not change the value of each
-proposition. Let $s$ be $(L~T~\mathit{STS}~\mathit{HW}~\mathit{ISRC})$
-and $\verb|(|\mathit{HW}\verb|).getPc|=\mathit{ID}$.
-\begin{itemize}
-\item \verb|taskTimeout| holds if and only if $L$ contains
-  \verb|error|s. Since \verb|delta| does not produce or eliminate
-  \verb|error| in $L$, \verb|taskTimeout| holds in $s$ if and only if
-  \verb|taskTimeout| holds in $\deltaS{s}{r}$ for any $r<\mteS{s}$,
-  implying our model is tick-invariant with respect to
-  \verb|taskTimeout|.
-\item The value of \verb|correct| depends on $\mathit{ID}$ and
-  status of each task in $L$. Similarly, \verb|delta| does not change
-  $\mathit{ID}$ or status of any task in $L$, hence \verb|correct|
-  holds in $s$ if and only if \verb|correct| holds in $\deltaS{s}{r}$
-  for any $r<\mteS{s}$. It concludes the tick-invariance of
-  \verb|correct|.
-\end{itemize}
-
-Therefore, by Theorem~\ref{t:completeness}, our approach using untimed
-model checking to verify schedulability and correctness is complete.
-\end{IEEEproof}
-}

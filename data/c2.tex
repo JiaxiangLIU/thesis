@@ -5,9 +5,9 @@
 
 \section{引言}
 
-重写（Rewriting）是一种基于规则的、非确定性的（Non-deterministic）抽象计算技术，它利用内涵的方式来定义计算。重写模型（Rewrite system）则可看作用于描述计算的计算模型。一个重写模型包含若干条形如 $l\ra r$ 的规则。对象表达式根据这些规则进行语法上的变换，从而产生新的对象表达式，这个过程形式化地定义了“计算”的语义。
+重写（rewriting）是一种基于规则的、非确定性的（non-deterministic）抽象计算技术，它利用内涵的方式来定义计算。重写模型~\cite{DBLP:books/el/leeuwen90/DershowitzJ90,terese} 则可看作用于描述计算的计算模型。一个重写模型包含若干条形如 $l\ra r$ 的规则。对象表达式根据这些规则进行语法上的变换，从而产生新的对象表达式，这个过程形式化地定义了“计算”的语义。
 
-重写概念的提出，一开始是为了解决等式判断的问题。例如给定两个表达式 $2+2$ 和 $4+0$，如何判断它们是否相等。这需要一种技术将两个表达式各自计算成为最简形式（“范式”），然后判断它们的范式是否相等，从而得到原表达式是否相等的结论。重写作为一种抽象技术，被越来越多学者深入研究，逐渐形成其理论体系。目前重写已经成为代数规范语言（Algebraic specification language）、函数式编程语言（Functional language）的核心。在基于类型论（Type theory）的定理证明器（如Coq）中，重写技术对逻辑规约和类型推导也起到了不可或缺的关键作用。
+重写概念的提出，一开始是为了解决等式判断的问题。例如给定两个表达式 $2+2$ 和 $4+0$，如何判断它们是否相等。这需要一种技术将两个表达式各自计算成为最简形式（“范式”），然后判断它们的范式是否相等，从而得到原表达式是否相等的结论。重写作为一种抽象技术，被越来越多学者深入研究，逐渐形成其理论体系。目前重写已经成为代数规范语言~\cite{DBLP:conf/lics/JouannaudO91}（algebraic specification language）、函数式编程语言~\cite{DBLP:journals/cj/Hughes89}（functional language）的核心。在基于类型论的定理证明器（如Coq）中，重写技术对逻辑规约和类型推导也起到了不可或缺的关键作用~\cite{assaf16a}。
 
 重写模型作为一种抽象的底层模型，与自动机类似，其本身的语义是非常简单的。若要利用重写模型对复杂的计算甚至是系统行为进行描述与建模，则需要对重写模型本身及其语义进行扩展。这需要面临两方面的挑战：
 \begin{enumerate}
@@ -24,9 +24,9 @@
 
 重写模型作为一种计算模型，主要包括两个部分——操作对象及操作规则。对重写模型表达能力的扩展主要也包括两个方向。
 
-一个方向是对操作对象进行扩展。最初的重写模型，其操作对象是抽象的无结构的对象。根据应用的需求，逐渐产生了针对字符串的串重写模型（String rewrite system）、针对项表达式的项重写模型（Term rewrite system）、针对图的图重写模型（Graph rewrite system）等各种各样的重写模型。由于各种对象所具有的结构性质不甚相同，因此各种重写模型的扩展都具有自身表达能力的优势。由于本文的目的是对嵌入式系统进行建模，因此本文主要讨论较适合于系统建模的项重写模型（以下简称“重写模型”）。
+一个方向是对操作对象进行扩展。最初的重写模型，其操作对象是抽象的无结构的对象。根据应用的需求，逐渐产生了针对字符串的串重写模型~\cite{DBLP:journals/jsc/Book87}（string rewrite system）、针对项表达式的项重写模型~\cite{terese}（term rewrite system）、针对图的图重写模型~\cite{DBLP:journals/tcs/Raoult84}（graph rewrite system）等各种各样的重写模型。由于各种对象所具有的结构性质不甚相同，因此各种重写模型的扩展都具有自身表达能力的优劣。由于本文的目的是对嵌入式系统进行建模，因此本文主要讨论较适合于系统建模的项重写模型（以下简称“重写模型”）。
 
-另一个方向是对规则及其应用策略进行扩展。如果规则两边的表达式互相之间不存在主次关系，则有向的规则将变得毫无意义。这时候我们需要引入等价关系。模重写模型（Rewrite system modulo）与类重写模型（Class rewrite system）就是为了描述等价关系而产生的重写模型的扩展，其主要区别在于规则应用策略的不同。范式重写模型（Normal rewrite system）和重写逻辑分别基于模重写模型和类重写模型，增加了其中等价关系的表达能力。另一方面，条件重写模型（Conditional rewrite system）在规则中增加了条件约束，使其能描述重写规则应用时应满足的约束条件。然而，针对真实系统中的确定性和非确定性行为，目前还没有很好的解决方案能对其进行区分描述。
+另一个方向是对规则及其应用策略进行扩展。如果规则两边的表达式互相之间不存在主次关系，则有向的规则将变得毫无意义。这时候我们需要引入等价关系。模重写模型~\cite{DBLP:journals/jacm/PetersonS81} 与类重写模型~\cite{lankford77b}（class rewrite system）就是为了描述等价关系而产生的重写模型的扩展，其主要区别在于规则应用策略的不同。范式重写模型~\cite{DBLP:conf/csl/JouannaudL12}（normal rewrite system）和重写逻辑~\cite{DBLP:journals/tcs/Marte-OlietM02,DBLP:journals/jlp/Meseguer12} 分别基于模重写模型和类重写模型，进一步增加了其中等价关系的表达能力。另一方面，条件重写模型~\cite{DBLP:conf/ctrs/Gramlich94} 在规则中增加了条件约束，使其能描述重写规则应用时应满足的约束条件。然而，针对真实系统中的确定性和非确定性行为，目前还没有很好的解决方案能对其进行区分描述。
 
 本文提出的规范化条件重写模型及其重写策略，主要就是为了在模型层面区分确定性行为与非确定性行为，使建模者在应用该模型对系统进行建模分析时更加方便，更加具有针对性。
 
@@ -153,7 +153,7 @@
 给定词汇表$\cF$，一条重写规则是由项表达式$l,r\in\TFX$组成的有序对（二元组），记作$l\ra r$。其中$l$称作该重写规则的左项，$r$称作该重写规则的右项。
 \end{definition}
 
-\begin{definition}[重写模型]
+\begin{definition}[重写模型~\cite{terese}]
 \label{d:rewrite-sys}
 给定词汇表$\cF$，重写模型是一个由若干重写规则组成的集合$\cR = \{l_i \ra r_i\}_i$。
 \end{definition}
@@ -306,7 +306,7 @@ t & = & \add(\zero,\underline{\add(\zero,x)}) \lrps{2}{}
 给定词汇表$\cF$，一条等式规则是由项表达式$l,r\in\TFX$组成的无序对（无序二元组），记作$l\sim r$。
 \end{definition}
 
-\begin{definition}[等价模型]
+\begin{definition}[等价模型~\cite{DBLP:journals/jacm/PetersonS81}]
 \label{d:eq-sys}
 给定词汇表$\cF$，等价模型是一个由若干等式规则组成的集合$\cE = \{l_i \sim r_i\}_i$。
 \end{definition}
@@ -360,7 +360,7 @@ $\eqps{*}{\cE}$。
 
 等价关系为抽象的函数符号赋予了“等价”的语义。等价关系的引入，是为了增强重写的能力。\emph{模重写}技术的目的就是定义一种二者融合的方式。
 
-\begin{definition}[模重写模型]
+\begin{definition}[模重写模型~\cite{DBLP:journals/jacm/PetersonS81}]
 \label{d:rewsys-modulo}
 给定词汇表$\cF$，模重写模型是一个由重写模型$\cR$和等价模型$\cE$组成的有序对（二元组），记作$\cR_{\cE} \defeq \lb \cR, \cE \rb$。
 \end{definition}
@@ -449,7 +449,7 @@ l \ra r & \Dla & u_1 = v_1 \land \ldots \land u_n = v_n \;\; ,\nonumber
 其中$l,r\in\TFX$，对$1\le i\le n$有$u_i,v_i\in\TFX$。其中$l$称作该条件重写规则的左项，$r$称作该条件重写规则的右项，$u_i = v_i$称作该条件重写规则的条件约束。
 \end{definition}
 
-\begin{definition}[条件重写模型]
+\begin{definition}[条件重写模型~\cite{DBLP:conf/ctrs/Gramlich94}]
 \label{d:crewrite-sys}
 给定词汇表$\cF$，条件重写模型是一个由若干条件重写规则组成的集合$\cR = \{l_i \ra r_i \Dla C_i \}_i$。
 \end{definition}

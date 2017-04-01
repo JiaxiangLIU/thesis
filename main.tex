@@ -15,9 +15,15 @@
 \usepackage{tensor}
 \usepackage{xspace}
 \usepackage{alltt}
-\usepackage{pdflscape}
+%\usepackage{pdflscape}
+\usepackage{lscape} 
 \usepackage[boxed]{algorithm2e}
 \usepackage{mathpartir}
+\usepackage{amssymb}
+\usepackage{wasysym}
+\usepackage{marvosym}
+\usepackage{pifont}
+
 
 
 %\usepackage{amsmath,amssymb,latexsym} 
@@ -50,7 +56,7 @@
 \newcommand{\rhs}{\operatorname{\mathsf{right}}}
 \newcommand{\change}{\operatorname{\mathsf{change}}}
 \newcommand{\comp}{\operatorname{\mathsf{::}}}
-\newcommand{\clock}{\operatorname{\mathsf{clock}}}
+\renewcommand{\clock}{\operatorname{\mathsf{clock}}}
 \newcommand{\broken}{\operatorname{\mathsf{broken}}}
 \newcommand{\myempty}{\operatorname{\mathsf{empty}}}
 
@@ -65,7 +71,15 @@
 \newcommand{\ty}{\texttt{ty}}
 \newcommand{\transto}{\rightsquigarrow}
 
+\newcommand{\allsup}{\ding{51}}
+\newcommand{\halfsup}{\CheckedBox}
+\newcommand{\nonsup}{\ding{55}}
 
+\newcommand\TTT{%
+ \textsf{T\kern-0.2em\raisebox{-0.3em}T\kern-0.2emT\kern-0.2em\raisebox{-0.3em}2}%
+}
+
+\newcommand{\CTerm}{Ceagle-\textsc{Term}\xspace}    
 
 \begin{document}
 
@@ -74,13 +88,13 @@
 \input{data/cover}
 % 如果使用授权说明扫描页，将可选参数中指定为扫描得到的 PDF 文件名，例如：
 % \makecover[scan-auth.pdf]
-%\makecover  
+\makecover  
 
 %% 目录
 \tableofcontents
 
 %% 符号对照表
-%%\input{data/denotation}
+\input{data/denotation}
 
 
 %%% 正文部分
@@ -111,7 +125,7 @@
 
 
 %% 致谢
-%%\include{data/ack}
+\include{data/ack} 
 
 %% 附录
 \begin{appendix}
@@ -119,7 +133,7 @@
 \end{appendix}
 
 %% 个人简历
-%\include{data/resume} 
+\include{data/resume} 
 
 %% 本科生进行格式审查是需要下面这个表格，答辩可能不需要。选择性留下。
 % 综合论文训练记录表

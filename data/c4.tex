@@ -1,10 +1,51 @@
 \chapter{C 语言程序终止性的自动验证}
+\label{cha:c-termination}
 
-本章探讨规范化条件重写模型在建模验证中的另一个应用：对 C 语言程序的终止性进行自动验证。
+上一章从建模方法论的角度，试图提高规范化条件重写模型作为一种建模模型的易用性。本章将从另外一个角度切入，进一步降低利用规范化条件重写模型进行建模验证的成本。在此前的讨论中，建模过程不针对任何特定的验证属性。这要求建立的模型应尽可能涵盖系统各方面的行为特征，并包含尽可能多的细节，使得针对模型任何属性的验证结果都可以代表系统的性质。因此，为了保证模型与系统的等价性以及抽象程度的合理性，建模过程只能通过人工进行。然而，如果只针对某种特定属性，如可达性、终止性等，则建模过程只需要针对系统行为的某个侧面进行。这将显著地降低建模的难度，使得建模过程的自动化成为可能。
+
+本章在已有对 C 语言程序自动建模的工作基础上，开发实现了针对 C 语言程序终止性的自动验证工具 \CTerm。
 
 \section{引言}
 
+程序的终止性问题是验证领域的一个重要问题。它的重要性主要体现在两个方面。首先，终止性是完全正确性（Total correctness）的必要条件。一个程序（或算法）被称作完全正确，当且仅当它是终止的，且它的行为符合其规约（Specification）的规定。用 Hoare 逻辑~\cite{DBLP:journals/cacm/Hoare69} 表示，三元组 $\{P\}~\texttt{C}~\{Q\}$ 成立，当且仅当在满足谓词 $P$ 的前提下，(i) 程序 $\texttt{C}$ 终止；且 (ii) 执行完 $\texttt{C}$ 后谓词 $Q$ 成立。而一个程序（或算法）称作部分正确，则只要求在假设它终止的前提下，其行为符合规约的规定。也就是说，三元组 $\{P\}~\texttt{C}~\{Q\}$ 成立，当且仅当在满足谓词 $P$ 的前提下，如果程序 \verb|C| 终止，则执行完 $\texttt{C}$ 后谓词 $Q$ 成立。举以下简单例子：
+\begin{verbatim}
+    {x == 1} while (true) x = x; {y == 2}
+\end{verbatim}
+由于其 \verb|while| 循环不终止，该程序根据其规约，不是完全正确的，但它是部分正确的。
+
+程序终止性的第二个重要性在于，对 CTL~\cite{DBLP:conf/lop/ClarkeE81}、CTL*~\cite{DBLP:journals/jacm/EmersonH86}、Fair-CTL~\cite{DBLP:journals/jcss/EmersonH85} 以及 LTL~\cite{DBLP:conf/banff/Vardi95} 性质的验证，可以转化为对安全性~\cite{DBLP:journals/tse/Lamport77}（safety）和对终止性的验证~\cite{DBLP:conf/tacas/BrockschmidtCIK16}。由于目前大多数程序验证工具都针对安全性进行验证，因此终止性验证工具的研究理论上可以提升这些程序验证工具的验证能力。
+
+嵌入式系统的软件部分通常由 C 语言进行实现，因此开发 C 语言程序的终止性自动验证工具，对保障嵌入式系统的可靠性具有重要意义。
+
+程序的终止与否，有时候并不容易判断，如以下例子（Collatz 问题）：
+\begin{verbatim}
+    while (x > 1) {
+      if (even(x))  x = x / 2;
+      else  x = 3 * x + 1;
+    }
+\end{verbatim}
+目前有许多技术可以自动验证一个程序的终止性，而其中一种主流技术正是基于整数重写模型~\cite{DBLP:conf/rta/FalkeKS11}。整数重写模型可以看作是规范化条件重写模型的一种特例。在第~\ref{cha:normalrewriting} 章已经提到，重写模型的终止性是该领域的最重要问题之一，目前已经有大量关于重写模型终止性的验证理论及工具。通过将程序（自动）建模成整数重写模型，程序终止性问题就可以被转化为重写模型的终止性问题，从而使用对应的技术进行解决。本文基于这种技术路线，开发了 C 语言程序终止性自动验证工具 \CTerm。
+
+本章其余部分组织结构如下：第~\ref{s:termination-related} 小节介绍相关的 C 程序终止性自动验证工具；第~\ref{s:termination-models} 小节讨论如何自动建立 C 程序的整数重写模型，以便对程序终止性进行验证；\CTerm 工具将在第~\ref{s:ceagle-termination} 小节进行介绍；最后对本章内容进行简要小结。 
+
+\section{相关工作}
+\label{s:termination-related}
+
+对指令式程序的终止性进行自动验证，目前主要有三种主流技术。 
+
+排序函数~\cite{DBLP:conf/lics/PodelskiR04}（ranking function）是最经典的用于证明程序终止性的技术。排序函数 $rank$ 将每一个程序状态 $s$ 映射为抽象域（如正整数域）中的一个元素 $rank(s)$。如果对于程序的每一步执行 $s \ra s'$，排序函数满足 $rank(s) > rank(s')$，且抽象域上的二元关系 $>$ 是良基的（Well-founded），即不存在无穷递减序列，则该程序是终止的。于是验证程序终止性的问题可以被归约为排序函数的构造问题。如果满足条件的排序函数存在，则可判断该程序终止。基于排序函数构造的自动验证工具主要有 \textsc{OctaTerm}~\cite{DBLP:conf/popl/BerdineCCDO07}、\textsc{PolyTerm}~\cite{DBLP:conf/popl/BerdineCCDO07}、FuncTion~\cite{DBLP:conf/sas/Urban13,DBLP:conf/tacas/Urban15} 和 \textsc{c2fsm+Aspic+Rank}~\cite{DBLP:conf/sas/AliasDFG10}。其中 \textsc{OctaTerm} 和 \textsc{PolyTerm} 并不支持 C 程序的输入，而 FuncTion 和 \textsc{c2fsm+Aspic+Rank} 可以支持。
+
+针对排序函数构造困难的问题，ARMC~\cite{DBLP:conf/padl/PodelskiR07}、CProver~\cite{DBLP:conf/cav/KroeningSTW10,DBLP:conf/tacas/TsitovichSWK11}、TERMINATOR~\cite{DBLP:conf/pldi/CookPR06} 及其后继工具 T2~\cite{DBLP:conf/tacas/BrockschmidtCIK16} 等 C 程序终止性验证工具采用了递增式的排序函数构造技术。这些工具将安全性检查过程集成到排序函数的构造过程中。其主要原理是，若当前已经有排序函数 $rank$ 对程序的某些执行序列满足递减关系，则利用安全性检查工具找到一条不能使 $rank$ 递减的执行序列 $\pi$；根据反例 $\pi$ 对 $rank$ 进行改善，得到新的排序函数 $rank'$。重复此过程直到构造的排序函数能使程序的所有执行序列满足递减关系。同样基于排序函数结合安全性检查技术的 C 程序终止性验证工具还有 \textsc{SeaHorn}~\cite{DBLP:conf/tacas/UrbanGK16} 和 2LS~\cite{DBLP:conf/kbse/ChenDKSW15}。在 \textsc{SeaHorn} 的实现中，安全性检查技术的使用方式与其它工具稍有不同，目的是为了在对当前排序函数进行改善时，能获得更多信息。而 2LS 则将过程间分析技术加入到排序函数的构造过程中。 
+ 
+另一个主流技术是将程序的终止性验证问题归约为重写模型的终止性判定问题。通过利用重写模型（或其扩展形式）对程序中影响终止性的行为进行自动建模，若模型具有终止性，则可判定该程序也具有终止性。这种技术方案的好处是可以充分利用重写领域对终止性的判定技术，如递归路径序~\cite{DBLP:journals/jsc/Dershowitz87}（Recursive path order）、Knuth-Bendix 序~\cite{knuth1983simple}（Knuth-Bendix order）、依赖对~\cite{DBLP:journals/tcs/ArtsG00,DBLP:journals/jsc/GieslAO02}（Dependency pair）等。基于这种技术方案的 C 程序终止性验证工具主要有 AProVE~\cite{DBLP:conf/cade/GieslBEFFOPSSST14}、\verb|llvm2KITTeL|+\verb|KITTeL|~\cite{DBLP:conf/rta/FalkeKS11}（以下简称为 \verb|KITTeL|） 和 c2lctrs+Ctrl~\cite{DBLP:conf/lpar/Kop015,KN15}（以下简称为 Ctrl）。其中 \verb|KITTeL| 和 Ctrl 的模型直接从 C 程序的控制流图中进行抽取，因此无法对涉及指针的程序行为进行描述。而 AProVE 先通过符号执行技术构造程序的一种中间表示形式——符号执行图（Symbolic execution graph），然后再从中抽取重写模型。由于符号执行图包含了程序中涉及指针的行为，因此 AProVE 的技术方案能更好地处理包含内存操作的 C 程序。
+
+近年来也出现了一些新兴的技术可用于验证 C 程序的终止性。例如工具 HipTNT+~\cite{DBLP:conf/pldi/LeQC15} 实现了一种基于函数摘要（Summary）的终止性验证技术，通过推理得到每个函数的终止性或非终止性的摘要，然后综合得到整个程序的终止性验证结果。Ultimate B\"uchi Automizer~\cite{DBLP:conf/cav/HeizmannHP14} 实现了一种基于程序构造的终止性验证技术。它首先对程序进行执行路径采样，得到若干套索形状（Lasso-shaped）的程序执行路径；然后根据这些路径构造出若干具有终止性的程序片段；重复该过程直到构造出来的程序片段集合可以涵盖目标程序的行为，则终止性得到证明。
+
+本文开发的 C 程序终止性自动验证工具 \CTerm 采用基于重写模型的验证技术，且利用符号执行图作为程序的中间表示形式，与 AProVE 工具类似。AProVE 作为一个闭源工具，其实现细节我们不得而知，但根据文献~\inlinecite{DBLP:journals/jar/StroderGBFFHSA17} 的描述，AProVE 的符号执行图构造过程在遇到递归函数时，可能无法终止。   \CTerm 与 AProVE 的主要区别在于，\CTerm 采用了单函数的内存模型，保证了符号执行图的构造过程在遇到递归函数时可以终止。
+
+
 \section{C 程序的整数重写模型}
+\label{s:termination-models}
 
 对 C 程序的终止性进行自动验证，其关键在于自动化构建 C 程序对应的整数重写模型。本文采取文献~\inlinecite{DBLP:conf/cade/StroderGBFFHS14} 的方法，基于符号执行技术构建 C 程序的符号执行图，再从符号执行图生成适用于终止性验证的整数重写模型。
 
@@ -15,7 +56,7 @@
 \label{f:C2intTRS}
 \end{figure}
 
-图~\ref{f:C2intTRS} 是 C 程序的整数重写模型自动构造流程。C 程序经过编译器 Clang 的编译后生成对应的 LLVM IR 代码。基于这些 LLVM IR 代码，利用符号执行技术，产生输入程序的符号执行图。整数变迁系统描述了该符号执行图的终止性行为。最后利用整数重写模型丰富的表达能力，将该整数变迁系统的语义编码成重写模型的形式。
+图~\ref{f:C2intTRS} 是 C 程序的整数重写模型自动构造流程。C 程序经过编译器 Clang 的编译后生成对应的 LLVM IR~\cite{DBLP:conf/cgo/LattnerA04} 代码。基于这些 LLVM IR 代码，利用符号执行技术~\cite{DBLP:journals/cacm/King76}，产生输入程序的符号执行图~\cite{DBLP:conf/lopstr/GieslSSEF12}。整数变迁系统~\cite{DBLP:journals/cacm/Keller76} 描述了该符号执行图的终止性行为。最后利用重写模型丰富的表达能力，将该整数变迁系统的语义编码成整数重写模型的形式。
 
 这个构造过程涉及到三个重要的模型：符号执行图、整数变迁系统和整数重写模型。在本小节接下来的部分将对这三个概念进行介绍，并对其构造的核心原理进行描述。
 
@@ -40,7 +81,7 @@
 定义~\ref{d:abstract-state} 与文献~\inlinecite{DBLP:conf/cade/StroderGBFFHS14} 对抽象程序状态定义的最主要区别是，定义~\ref{d:abstract-state} 描述了单函数的抽象状态，而文献~\inlinecite{DBLP:conf/cade/StroderGBFFHS14} 的定义包含了栈结构，允许描述多函数之间的调用。
 
 基于我们的简化定义，我们定义用于描述每个抽象程序状态的一阶谓词集合 $\lb a\rb$：
-\begin{definition}
+\begin{definition}[\inlinecite{DBLP:journals/jar/StroderGBFFHSA17}]
 给定抽象程序状态 $a$，一阶谓词集合 $\lb a\rb$ 是满足以下条件的最小集合：
 \begin{eqnarray}
 \lb a \rb & = & KB 
@@ -301,7 +342,7 @@ $ \\}
 
 \subsection{整数变迁系统}
 
-\begin{definition}[整数变迁系统]
+\begin{definition}[整数变迁系统~\cite{DBLP:journals/cacm/Keller76}]
 整数变迁系统是一个三元组 $\lb S, C, \transto \rb$：
 \begin{itemize}
 \item $S$ 是一组状态集合 $\{s_1,\ldots,s_n\}$；
@@ -322,7 +363,7 @@ $ \\}
 \end{enumerate}
 
 \subsection{整数重写模型}
-整数重写模型是规范化条件重写模型 $\RSE = \lb \cR,\cS,\cE \rb$ 的一种实例。当等价模型 $\cE$ 取整数代数运算符的性质集合（如加法交换律、乘法结合律等），化简模型 $\cS$ 取整数代数的计算规则时，规范化条件重写模型 $\RSE$ 实例化为整数重写模型，记作 $\cR_{\cI}$。
+整数重写模型~\cite{DBLP:conf/rta/FalkeKS11} 是规范化条件重写模型 $\RSE = \lb \cR,\cS,\cE \rb$ 的一种实例。当等价模型 $\cE$ 取整数代数运算符的性质集合（如加法交换律、乘法结合律等），化简模型 $\cS$ 取整数代数的计算规则时，规范化条件重写模型 $\RSE$ 实例化为整数重写模型，记作 $\cR_{\cI}$。
 
 整数重写模型的重写规则通常具有如下形式：
 \begin{eqnarray}
@@ -340,20 +381,20 @@ s_i(x_1,\ldots,x_n) & \ra & s_j(e_1,\dots,e_n) \;\Dla\; \varphi_c \nonumber
 \item $\varphi_c$ 是 $c$ 中除去“赋值语句”后的所有一阶公式的合取。
 \end{itemize}
 
-\section{Ceagle-Termination}
+\section{\CTerm}
+\label{s:ceagle-termination}
 
-\subsection{Ceagle-Termination 组成}
-
-如图~\ref{f:Ceagle-Termination} 所示， Ceagle-Termination 主要由三部分构成：符号执行模块，转换模块和编码模块。前端接入第三方工具 Clang，将待验证的 C 程序编译成为 LLVM IR 程序。符号执行模块接受 LLVM IR 代码输入，生成对应的符号执行图。符号执行图经过转换模块后，输出整数变迁系统。该变迁系统经过编码模块的编码，生成适合后端重写模型终止性求解器的整数重写模型。后端接入第三方终止性求解器（目前支持开源求解器 \verb|KITTeL|），求解输出终止性验证结果。
+\subsection{工具组成}
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{Ceagle-Termination.jpg}
-\caption{Ceagle-Termination 组成}
+\caption{\CTerm 组成}
 \label{f:Ceagle-Termination}
 \end{figure}
 
-Ceagle-Termination 的核心模块为符号执行模块，它涉及到对每一个抽象程序状态的符号执行、计算两个状态的抽象状态、以及对整个符号执行图进行构建。对状态的符号执行与抽象计算已经在小节\ref{ss:seg} 进行介绍，在此不再赘述。下面给出构建符号执行图的核心算法，见算法~\ref{alg:seg}。 
+如图~\ref{f:Ceagle-Termination} 所示， \CTerm 主要由三部分构成：符号执行模块，转换模块和编码模块。前端接入第三方工具 Clang，将待验证的 C 程序编译成为 LLVM IR 程序。符号执行模块接受 LLVM IR 代码输入，生成对应的符号执行图。符号执行图经过转换模块后，输出整数变迁系统。该变迁系统经过编码模块的编码，生成适合后端重写模型终止性求解器的整数重写模型。后端接入第三方终止性求解器（目前支持开源求解器 \verb|KITTeL|~\cite{DBLP:conf/rta/FalkeKS11}），求解输出终止性验证结果。
+
 
 \begin{algorithm}[htbp]
   \KwIn{$G$：只包含初始状态顶点的符号执行图}
@@ -472,14 +513,22 @@ Ceagle-Termination 的核心模块为符号执行模块，它涉及到对每一�
 \label{alg:evaluation}
 \end{algorithm}
 
+\CTerm 的核心模块为符号执行模块，它涉及到对每一个抽象程序状态的符号执行、计算两个状态的抽象状态、以及对整个符号执行图进行构建。对状态的符号执行与抽象计算已经在小节\ref{ss:seg} 进行介绍，在此不再赘述。下面给出构建符号执行图的核心算法，见算法~\ref{alg:seg}。 
 
-\subsection{Ceagle-Termination 性能评估}
+\subsection{性能评估} 
 \todo{需要等到工具原型开发完成}
+ 
+\todo{与 AProVE 、\texttt{KITTeL}、Ctrl 进行比较} 
 
-\todo{与 AProVE 、\texttt{KITTeL}、Ctrl 进行比较}
+\subsection{可扩展性}
+
+由于 \CTerm 的核心模块——符号执行模块是针对 LLVM IR 实现的，得益于 LLVM 一般化的框架及丰富的工具集，通过接入不同的前端，\CTerm 可以支持更多类型的程序终止性验证。比如利用 GCC 搭配 DragonEgg~\cite{dragonegg} 作为前端，则可以实现对 Ada 语言~\cite{DBLP:journals/computer/WolfeBSTW81} 和 Fortran 语言~\cite{DBLP:books/sp/ChiversS15} 程序的终止性验证。
+
+从后端的角度看，由于 \CTerm 输出的模型及模型格式由编码模块决定，因此通过对编码模块进行扩展，可以实现后端对更多重写模型终止性求解器的支持，比如 Ctrl~\cite{DBLP:conf/lpar/Kop015} 和 \TTT~\cite{DBLP:conf/rta/KorpSZM09}。 
+
 
 \section{本章小结}
 
-整数重写模型是规范化条件重写模型的一种特例。基于整数重写模型和符号执行图，我们开发了针对 C 语言程序终止性的自动验证工具 Ceagle-Termination。该工具接受 C 语言程序输入，并自动对其进行模型转换与终止性求解，不需要人工参与。
+整数重写模型是规范化条件重写模型的一种特例。基于整数重写模型和符号执行图，我们开发了针对 C 语言程序终止性的自动验证工具 \CTerm。该工具接受 C 语言程序输入，并自动对其进行模型转换与终止性求解，不需要人工参与。
 
 \todo{评价其表现}
