@@ -14,13 +14,13 @@
   %=========
   % 中文信息
   %=========
-  ctitle={基于重写理论的\\嵌入式系统建模与验证},
+  ctitle={基于重写技术的\\ 嵌入式系统建模与验证},
   cdegree={工学博士},
   cdepartment={计算机科学与技术系},
   cmajor={计算机科学与技术},
   cauthor={刘嘉祥},
   csupervisor={顾　明教授},
-  cassosupervisor={孙家广教授}, % 副指导老师
+  % cassosupervisor={孙家广教授}, % 副指导老师
   % ccosupervisor={某某某教授}, % 联合指导老师
   % 日期自动使用当前时间，若需指定按如下方式修改：
   % cdate={超新星纪元},
@@ -56,13 +56,13 @@
   emajor={Computer Science and Technology},
   eauthor={Liu Jiaxiang},
   esupervisor={Professor Gu Ming},
-  eassosupervisor={Professor Sun Jiaguang},
+  % eassosupervisor={Professor Sun Jiaguang},
   % 日期自动生成，若需指定按如下方式修改：
-  % edate={December, 2005}
+  % edate={December, 2005} 
   %
   % 关键词用“英文逗号”分割
   ckeywords={形式化方法, 嵌入式系统, 规范化条件重写模型, 建模, 验证},
-  ekeywords={formal methods, embedded systems, normalization conditional rewrite sytems, modeling, verification}
+  ekeywords={formal methods, embedded systems, normalization conditional rewrite systems, modeling, verification}
 }
 
 % 定义中英文摘要和关键字
@@ -73,7 +73,7 @@
 
 \begin{enumerate}
 \item
-针对重写模型对顺序行为表达能力的局限性，本文提出能够支持确定性行为描述的规范化条件重写模型。规范化条件重写模型支持自定义数据类型，具备描述状态等价、条件控制的表达能力，也能够对以硬件并发行为为代表的不确定性行为、以及以软件顺序行为为代表的确定性行为进行描述和语义区分。
+针对重写模型对顺序行为表达能力的局限性，本文提出能够支持确定性行为描述的规范化条件重写模型。规范化条件重写模型支持自定义数据类型，具备描述状态等价、条件控制的表达能力，也能对以硬件并发行为为代表的不确定性行为、以及以软件顺序行为为代表的确定性行为进行描述和语义区分。
 \item
 针对模型易用性问题，以建模方法论为切入点，本文基于规范化条件重写模型，提出一套对嵌入式系统结构层次性、行为异构性、结构动态性和实时性等特征的建模方法，旨在对建模过程进行指导。基于语义映射的方式，本文对该建模框架予以实现，并通过对两个真实嵌入式系统进行应用，验证了该方法在嵌入式系统中实际应用的可行性。
 \item 
@@ -92,12 +92,12 @@ Embedded systems are increasingly used in the modern society, becoming
 embedded in our lives. Due to the importance of their reliability and safety, 
 formal methods for verifying the correctness of embedded systems are in great demand. As the heart of formal verification methods, formal models are the key to their application on embedded systems. Multithreading techniques are deployed in the modern systems, and there exists complicated interaction between embedded systems and their environment. Both will raise new challenges to the formal models about their abilities to model and verify.
 
-Recently, rewrite systems have won attention for formal verification, given the facts that they are suitable for modeling the behaviors of multithreads and they support multiple verification techniques such as model checking and theorem proving. To apply rewrite systems on realistic verification projects for embedded systems, we need to answer two questions: (1) How do we capture sequential behaviors via rewrite systems inheriting non-determinism? (2) How do we enhance the usability of rewrite systems to ease the modeling process? To answer these questions, this dissertation introduces a new formal model named \emph{normalization conditional rewrite systems}. Based on the new model, we develop a methodology for modeling embedded systems and a termination prover \CTerm for C programs:
+Recently, rewrite systems have won attention for formal verification, given the facts that they are suitable for modeling the behaviors of multithreads and they support multiple verification techniques such as model checking and theorem proving. To apply rewrite systems on realistic verification projects for embedded systems, we need to answer two questions: (1) How do we capture sequential behaviors via rewrite systems inheriting non-determinism? (2) How do we enhance the usability of rewrite systems to ease the modeling process? To answer these questions, this dissertation introduces a new formal model named \emph{normalization conditional rewrite systems}. Based on the new model, we develop a methodology for modeling embedded systems and a termination prover \CTerm\xspace for C programs: 
 
 \begin{enumerate}
 \item Aimed at the limitation of rewrite systems for expressing sequential behaviors, this dissertation introduces normalization conditional rewrite systems, which are able to describe deterministic behaviors. Normalization conditional rewrite systems support user-defined data types and the expressivity for state equivalence and conditional branching. They can also model and distinguish the semantics of non-deterministic behaviors, such as those concurrently in hardware, and of deterministic behaviors, such as those sequentially in software. 
 \item Aimed at the usability of the model, focusing on modeling methodologies, this dissertation proposes a methodology which captures the hierarchy, the heterogeneous behaviors, the dynamic structures and the real-timeness of embedded systems. We implement the methodology based on semantics mapping. Then we demonstrate its feasibility for application, by applying it on two realistic embedded systems. 
-\item Aimed at the usability of the model, focusing on the automatic construction of models of embedded software, this dissertation develops an automatic termination prover \CTerm for C programs based on normalization conditional rewrite systems. The tool provides possibility to prove total correctness of systems.  
+\item Aimed at the usability of the model, focusing on the automatic construction of models of embedded software, this dissertation develops an automatic termination prover \CTerm\xspace for C programs based on normalization conditional rewrite systems. The tool provides possibility to prove total correctness of systems.  
 \end{enumerate}
 
 As one of the case studies, the Train Optimized Control System is currently in smooth operation, and passes the on-board test by Shenyang Railway Administration; the formally verified Rate-Monotonic Scheduling System by this dissertation has been serving in some industrial avionic control system.

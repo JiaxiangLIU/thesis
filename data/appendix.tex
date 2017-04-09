@@ -1,37 +1,26 @@
 \chapter{定理~\ref{t:main} 的证明}
 \label{app:proof}
 
-\hide{
-\setcounter{theorem}{0}
-\renewcommand{\thetheorem}{\thesection.\arabic{theorem}}
-}
-%\newcommand{\lrps}[2]{\rightarrow^{#1}_{#2}}
-
 本附录给出定理~\ref{t:main} 的详细证明。
 
-为了证明定理~\ref{t:main} ，我们需要先介绍更多关于重写逻辑的背景知识~\cite{DBLP:journals/entcs/OlveczkyM07a}。如果一个项表达式 $t$ 不含变量，那么 $t$ 称作是\emph{封闭的}（ground）。给定原子命题的一个子集 $P\subseteq AP$ 和封闭的项表达式 $t$ 和 $t'$，如果 $t$ 满足的 $P$ 中的命题和 $t'$ 所满足的 $P$ 的命题完全一致，则记作 $t\simeq_P t'$ （如果 $P$ 可从上下文推断，则简记为 $t\simeq t'$）。
+为了证明定理~\ref{t:main}，我们需要先介绍更多关于重写逻辑的背景知识~\cite{DBLP:journals/entcs/OlveczkyM07a}。如果一个项表达式 $t$ 不含变量，那么 $t$ 称作是\emph{封闭的}（ground）。给定原子命题的一个子集 $P\subseteq AP$ 和封闭的项表达式 $t$ 和 $t'$，如果 $t$ 满足的 $P$ 中的命题和 $t'$ 所满足的 $P$ 的命题完全一致，则记作 $t\simeq_P t'$ （如果 $P$ 可从上下文推断，则简记为 $t\simeq t'$）。
 
-时间鲁棒性是我们希望一个实时重写理论所具有的一系列性质的集合。为了简化概念，我们在这里避免给出时间鲁棒性的准确定义，因为它对本附录的证明无关重要。我们给出以下引理用于证明时间鲁棒性：
+时间鲁棒性是我们希望一个实时重写逻辑模型所具有的一系列性质的集合。为了简化概念，我们在这里避免给出时间鲁棒性的准确定义，因为它对本附录的证明无关重要。我们给出以下引理用于证明时间鲁棒性：
 \begin{lemma}[\inlinecite{DBLP:journals/entcs/OlveczkyM07a}]
 \label{l:timerobustness}
 给定一个面向对象风格的模型 $\mathcal{R^L}$，它只包含一条标准的单元计时规则，且满足时间域中只包含一个非正常的时间值为 \verb|INF|。如果 $\mathcal{R^L}$ 对所有封闭的项表达式 $t$、$r$ 和 $r'$ 满足以下条件，则 $\mathcal{R^L}$ 具有时间鲁棒性：
 \begin{enumerate}[(i)]
 \item 
-对所有 $r\le$ \verb|mte(|$t$\verb|)| 满足
-\verb|mte(delta(|$t$\verb|,|$r$\verb|))| $=$
-\verb|mte(|$t$\verb|) monus |$r$，其中 \verb|monus| 是内置类型 \verb|Time| 的减法操作；
+对所有 $r\le$ \verb|mte(|$t$\verb|)| 满足 \verb|mte(delta(|$t$\verb|,|$r$\verb|))| $=$ \verb|mte(|$t$\verb|) monus |$r$，其中 \verb|monus| 是内置类型 \verb|Time| 的减法操作；
 
 \item
-\verb|delta(|$t$\verb|,|$0$\verb|)| $= t$;
+\verb|delta(|$t$\verb|,|$0$\verb|)| $= t$；
 
 \item
-对所有 $r+r'\le$ \verb|mte(|$t$\verb|)| 满足
-\verb|delta(delta(|$t$\verb|,|$r$\verb|),|$r'$\verb|)| $=$
-\verb|delta(|$t$\verb|,|$r+r'$\verb|)|；
+对所有 $r+r'\le$ \verb|mte(|$t$\verb|)| 满足 \verb|delta(delta(|$t$\verb|,|$r$\verb|),|$r'$\verb|)| $=$ \verb|delta(|$t$\verb|,|$r+r'$\verb|)|；
 
 \item
-对任意瞬时重写规则的左项表达式 $l$ 的所有封闭实例 $\sigma(l)$ 满足
-\verb|mte(|$\sigma(l)$\verb|)|$= 0$。
+对任意瞬时重写规则的左项表达式 $l$ 的所有封闭实例 $\sigma(l)$ 满足 \verb|mte(|$\sigma(l)$\verb|)|$= 0$。
 \end{enumerate}
 \end{lemma}
 
@@ -43,7 +32,7 @@
 如果不存在时间值 $r'>r$ 使得对于某个 $t''$ 满足 $t\lrps{r'}{}t''$，则该重写步骤被称为一个\emph{极大的单元计时步骤}（maximal tick step），记作 $t\lrps{r}{max}t'$；
 
 \item 
-如果对任意时间值 $r'>0$，都存在某个 $t''$ 满足 $t\lrps{r'}{}t''$，则该重写步骤被称作一个\emph{$\infty$ 单元计时步骤}（$\infty$ tick step），记作 $t\lrps{r}{\infty}t'$；
+如果对任意时间值 $r'>0$，都存在某个 $t''$ 满足 $t\lrps{r'}{}t''$，则该重写步骤被称作一个 \emph{$\infty$ 单元计时步骤}（$\infty$ tick step），记作 $t\lrps{r}{\infty}t'$；
 
 \item 
 如果存在一个极大的单元计时步骤 $t\lrps{r'}{max}t''$ 满足 $r'>r$，则该重写步骤被称为一个\emph{非极大的单元计时步骤}（non-maximal tick step）。
@@ -57,8 +46,7 @@
 我们需要以下引理证明我们的模型根据我们定义的命题具有单元计时不变性：
 \begin{lemma}[\inlinecite{DBLP:journals/entcs/OlveczkyM07a}]
 \label{l:tickinv}
-给定一个时间鲁棒的、面向对象风格的模型 $\mathcal{R^L}$，它只包含一条标准的单元计时规则，且满足时间域中只包含一个非正常的时间值为 \verb|INF|。 
-如果对于所有满足 $r<$ \verb|mte(|$t$\verb|)| 的 $t$ 和 $r$，都有 \verb|{|$t$\verb|}| $\simeq_P$ \verb|{delta(|$t$\verb|,|$r$\verb|)}| 成立，那么 $\mathcal{R^L}$ 是根据原子命题集合 $P$ 保持单元计时不变的。
+给定一个时间鲁棒的、面向对象风格的模型 $\mathcal{R^L}$，它只包含一条标准的单元计时规则，且满足时间域中只包含一个非正常的时间值为 \verb|INF|。如果对于所有满足 $r<$ \verb|mte(|$t$\verb|)| 的 $t$ 和 $r$，都有 \verb|{|$t$\verb|}| $\simeq_P$ \verb|{delta(|$t$\verb|,|$r$\verb|)}| 成立，那么 $\mathcal{R^L}$ 是根据原子命题集合 $P$ 保持单元计时不变的。
 \end{lemma}
 
 \newcommand{\mteTask}[2]{\texttt{mteTask(}#1\texttt{,}#2\texttt{)}}
@@ -163,8 +151,7 @@
 \deltaTask{\mathit{ID}}{\deltaTask{\mathit{ID}}{L}{r}}{r'}
 & = & \deltaTask{\mathit{ID}}{L}{r+r'}
 \end{eqnarray*}
-成立。又因为 $(v\; \verb|monus|\; r)\; \verb|monus|\; r' = v\;
-\verb|monus|\; (r+r')$ 对所有 \verb|Time| 类型的项表达式 $v$ 成立，于是
+成立。又因为 $(v\; \verb|monus|\; r)\; \verb|monus|\; r' = v\;\verb|monus|\; (r+r')$ 对所有 \verb|Time| 类型的项表达式 $v$ 成立，于是
 \begin{eqnarray*}
 \deltaIS{\deltaIS{\mathit{ISRC}}{r}}{r'} & = & \deltaIS{\mathit{ISRC}}{r+r'}
 \end{eqnarray*}
@@ -179,13 +166,12 @@
 \end{eqnarray*}
 以此类推，其它规则也可根据其条件约束得到证明。综上所述，根据引理~\ref{l:timerobustness} 可证我们的模型满足时间鲁棒性。
 
-最后，我们证明用于分析模型的命题（即 \verb|taskTimeout| 和 \verb|correct|）满足单元计时不变性。根据引理~\ref{l:tickinv}，我们必须证明 
-$\verb|{|s\verb|}|\simeq_P\verb|{|\deltaS{s}{r}\verb|}|$ 对所有 \verb|System| 类型的项表达式 $s$ 和 $r<\mteS{s}$ 成立。也就是说，对系统状态项表达式应用单元计时规则使得时间往前推移 $r$ 个时间单位，并不会对任意命题的真值产生影响。假设 $s$ 的形式为 $(L~T~\mathit{STS}~\mathit{HW}~\mathit{ISRC})$ 且 $\verb|(|\mathit{HW}\verb|).getPc|=\mathit{ID}$。
+最后，我们证明用于分析模型的命题（即 \verb|taskTimeout| 和 \verb|correct|）满足单元计时不变性。根据引理~\ref{l:tickinv}，我们必须证明 $\verb|{|s\verb|}|\simeq_P\verb|{|\deltaS{s}{r}\verb|}|$ 对所有 \verb|System| 类型的项表达式 $s$ 和 $r<\mteS{s}$ 成立。也就是说，对系统状态项表达式应用单元计时规则使得时间往前推移 $r$ 个时间单位，并不会对任意命题的真值产生影响。假设 $s$ 的形式为 $(L~T~\mathit{STS}~\mathit{HW}~\mathit{ISRC})$ 且 $\verb|(|\mathit{HW}\verb|).getPc|=\mathit{ID}$。
 \begin{itemize}
 \item 
-命题 \verb|taskTimeout| 成立当且仅当 $L$ 中包含 \verb|error|。由于 \verb|delta| 并不会在 $L$ 中产生或减少 \verb|error|，因此命题 \verb|taskTimeout| 针对状态 $s$ 成立，当且仅当， \verb|taskTimeout| 针对状态 $\deltaS{s}{r}$ 成立，其中 $r<\mteS{s}$。这意味着我们的模型根据 \verb|taskTimeout| 保持单元计时不变性。
+命题 \verb|taskTimeout| 成立当且仅当 $L$ 中包含 \verb|error|。由于 \verb|delta| 并不会在 $L$ 中产生或减少 \verb|error|，因此命题 \verb|taskTimeout| 针对状态 $s$ 成立，当且仅当，\verb|taskTimeout| 针对状态 $\deltaS{s}{r}$ 成立，其中 $r<\mteS{s}$。这意味着我们的模型根据 \verb|taskTimeout| 保持单元计时不变性。
 \item 
-命题 \verb|correct| 的真值取决于 $\mathit{ID}$ 以及 $L$ 中所有任务的状态。与上述情况类似，\verb|delta| 无法改变 $\mathit{ID}$ 或 $L$ 中任意任务的状态，所以命题 \verb|correct| 在状态 $s$ 成立， 当且仅当， \verb|correct| 在状态 $\deltaS{s}{r}$ 也成立，其中 $r<\mteS{s}$。模型根据命题 \verb|correct| 的单元计时不变性得证。
+命题 \verb|correct| 的真值取决于 $\mathit{ID}$ 以及 $L$ 中所有任务的状态。与上述情况类似，\verb|delta| 无法改变 $\mathit{ID}$ 或 $L$ 中任意任务的状态，所以命题 \verb|correct| 在状态 $s$ 成立， 当且仅当，\verb|correct| 在状态 $\deltaS{s}{r}$ 也成立，其中 $r<\mteS{s}$。模型根据命题 \verb|correct| 的单元计时不变性得证。
 \end{itemize}
 
 综上所述，根据定理~\ref{t:completeness}，我们应用非时控模型检测对可调度性及系统正确性进行验证的方法具有完备性。

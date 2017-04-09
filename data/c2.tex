@@ -1,21 +1,21 @@
 \chapter{规范化条件重写模型}
-\label{cha:normalrewriting}
+\label{cha:normalrewriting} 
 
-嵌入式系统的日益复杂，要求用于对其建模的模型具有丰富的表达能力。重写模型作为一种基于语法、基于规则的计算模型，其表达能力具有很强的可塑性，目前已衍生出多种扩展形式。这些重写模型的扩展包括对等价关系、条件判断等行为的表达能力提升。在实际系统中，存在某类行为，其自身的运行结果是确定的，不会因系统中其它组件的交互而受到影响，也不会影响其它组件的运行结果，我们称其为确定性行为。从验证的角度来说，系统空间的大小主要由非确定性行为决定，因此在模型中对确定性行为与非确定性行为区别对待，是很有必要的。目前已有的重写模型扩展，都没有针对这一问题给出解决方案。本章提出的规范化条件重写模型，是针对这一问题试图给出合理解决方案的一种新的重写模型扩展形式。
+嵌入式系统的日益复杂，要求用于对其建模的形式化模型具有丰富的表达能力。重写模型作为一种基于语法、基于规则的计算模型，其表达能力具有很强的可塑性，目前已衍生出多种扩展形式。这些重写模型的扩展包括对等价关系、条件判断等行为的表达能力提升。在实际系统中，存在某类行为，其自身的运行结果是确定的，不会因系统中其它组件的交互而受到影响，也不会影响其它组件的运行结果，例如嵌入式软件中只涉及局部变量的顺序行为。我们称其为\emph{确定性行为}。从验证的角度来说，系统状态空间的大小主要由\emph{非确定性行为}（又称“\emph{不确定性行为}”）决定，因此在模型中对确定性行为与非确定性行为进行区分，对于模型验证具有重要意义。目前已有的重写模型扩展，都没有针对这一问题给出解决方案。本章提出的规范化条件重写模型，是针对这一问题试图给出合理解决方案的一种新的重写模型扩展形式。
 
 \section{引言}
 
-重写（rewriting）是一种基于规则的、非确定性的（non-deterministic）抽象计算技术，它利用内涵的方式来定义计算。重写模型~\cite{DBLP:books/el/leeuwen90/DershowitzJ90,terese} 则可看作用于描述计算的计算模型。一个重写模型包含若干条形如 $l\ra r$ 的规则。对象表达式根据这些规则进行语法上的变换，从而产生新的对象表达式，这个过程形式化地定义了“计算”的语义。
+\emph{重写}（rewriting）是一种基于规则的、非确定性的（non-deterministic）抽象计算技术，它利用内涵（intensional）的方式来定义计算。重写模型~\cite{DBLP:books/el/leeuwen90/DershowitzJ90,terese} 则可看作用于描述计算的计算模型。一个重写模型包含若干条形如 $l\ra r$ 的规则。对象表达式根据这些规则进行语法上的变换，从而产生新的对象表达式，这个过程形式化地定义了“计算”的语义。
 
-重写概念的提出，一开始是为了解决等式判断的问题。例如给定两个表达式 $2+2$ 和 $4+0$，如何判断它们是否相等。这需要一种技术将两个表达式各自计算成为最简形式（“范式”），然后判断它们的范式是否相等，从而得到原表达式是否相等的结论。重写作为一种抽象技术，被越来越多学者深入研究，逐渐形成其理论体系。目前重写已经成为代数规范语言~\cite{DBLP:conf/lics/JouannaudO91}（algebraic specification language）、函数式编程语言~\cite{DBLP:journals/cj/Hughes89}（functional language）的核心。在基于类型论的定理证明器（如Coq）中，重写技术对逻辑规约和类型推导也起到了不可或缺的关键作用~\cite{assaf16a}。
+重写概念的提出，一开始是为了解决等式判断的问题。例如给定两个表达式 $2+2$ 和 $4+0$，如何判断它们是否相等。这需要一种技术将两个表达式各自计算成为最简形式（“范式”），然后判断它们的范式是否相等，从而得到原表达式是否相等的结论。重写作为一种抽象技术，被越来越多学者深入研究，逐渐形成其理论体系。目前重写已经成为代数规范语言~\cite{DBLP:conf/lics/JouannaudO91}（algebraic specification language）、函数式编程语言~\cite{DBLP:journals/cj/Hughes89}（functional language）的核心。在基于类型论的定理证明器（如Coq~\cite{DBLP:series/txtcs/BertotC04}）中，重写技术对逻辑规约和类型推导也起到了不可或缺的关键作用~\cite{assaf16a}。
 
-重写模型作为一种抽象的底层模型，与自动机类似，其本身的语义是非常简单的。若要利用重写模型对复杂的计算甚至是系统行为进行描述与建模，则需要对重写模型本身及其语义进行扩展。这需要面临两方面的挑战：
+重写模型作为一种抽象的底层模型，与自动机类似，其本身的语义是非常简单的。若要利用重写模型对复杂的计算甚至是系统行为进行描述与建模，则需要对重写模型的语法及语义进行扩展。这需要面临两方面的挑战：
 \begin{enumerate}
-\item \textbf{规则的扩展：} 标准的重写模型包含一个规则集合，这些规则描述了计算的方法。规则之间处于对等的地位，不存在种类的差别。然而在实际的软硬件系统中，行为是有各种各样的，比如同步行为、异步行为、确定性行为、不确定性行为等。如果不在模型的层次上对各种行为加以区分，则会对建模者产生诸多不便。因此需要对标准重写模型的规则定义进行扩展，以便于描述系统中丰富的行为种类。
-\item \textbf{规则应用策略的扩展：} 在对标准重写模型的规则定义进行扩展后，如何定义不同种类规则的应用策略，才能使其描述的计算更加贴近实际系统中的行为，成为了我们必须考虑的问题。
+\item \textbf{规则的扩展}，即语法扩展。标准的重写模型包含一个规则集合，这些规则描述了计算的方法。规则之间处于对等的地位，不存在种类的差别。然而在实际的软硬件系统中，行为具有多样性，比如同步行为、异步行为、确定性行为、不确定性行为等。如果不在模型的层次上对各种行为加以区分，则会对建模人员带来诸多不便。因此需要对标准重写模型的规则定义进行扩展，以便于描述系统中丰富的行为种类。
+\item \textbf{规则应用策略的扩展}，即语义扩展。重写规则只从形式上定义了重写模型的构成，而规则应用策略规定了重写规则的应用方式，即语义。在对标准重写模型的规则进行扩展后，如何定义不同种类规则的应用策略，才能使其描述的计算更加贴近实际系统中的行为，是必须考虑的问题。
 \end{enumerate}
 
-本章基于现有的多种重写模型的扩展，提出了\emph{规范化条件重写模型}，它在模型层次支持等价规则、条件规则、确定性规则等不同种类的规则。我们还定义了规范化条件重写的规则应用策略，描述了确定性计算与非确定性计算的一种协作方式。
+本章基于现有的多种重写模型的扩展，提出了\emph{规范化条件重写模型}（normalization conditional rewrite system），它在模型层次支持等价规则、条件规则、确定性规则等不同种类的规则。我们还定义了规范化条件重写的规则应用策略，描述了确定性计算与非确定性计算的一种协作方式。
 
 本章余下部分组织结构如下：首先在第~\ref{s:rs-related} 小节简要介绍相关的重写模型扩展工作；在第~\ref{s:rewritesystem} 小节，我们给出重写模型的形式化定义；紧接着在第~\ref{s:rs-ext} 小节，针对涉及等价关系的计算以及带条件的计算，我们给出重写模型的两种经典扩展形式；在第~\ref{s:normalrs} 小节，针对确定性与非确定性计算，我们提出新的规范化条件重写模型；最后对本章进行简要小结。
 
@@ -24,62 +24,62 @@
 
 重写模型作为一种计算模型，主要包括两个部分——操作对象及操作规则。对重写模型表达能力的扩展主要也包括两个方向。
 
-一个方向是对操作对象进行扩展。最初的重写模型，其操作对象是抽象的无结构的对象。根据应用的需求，逐渐产生了针对字符串的串重写模型~\cite{DBLP:journals/jsc/Book87}（string rewrite system）、针对项表达式的项重写模型~\cite{terese}（term rewrite system）、针对图的图重写模型~\cite{DBLP:journals/tcs/Raoult84}（graph rewrite system）等各种各样的重写模型。由于各种对象所具有的结构性质不甚相同，因此各种重写模型的扩展都具有自身表达能力的优劣。由于本文的目的是对嵌入式系统进行建模，因此本文主要讨论较适合于系统建模的项重写模型（以下简称“重写模型”）。
+一个方向是对操作对象进行扩展。最初的重写模型，其操作对象是抽象的无结构的对象。根据应用的需求，逐渐产生了针对字符串的\emph{串重写模型}~\cite{DBLP:journals/jsc/Book87}（string rewrite system）、针对项表达式的\emph{项重写模型}~\cite{terese}（term rewrite system）、针对图的\emph{图重写模型}~\cite{DBLP:journals/tcs/Raoult84}（graph rewrite system）等各种各样的重写模型。由于各种对象所具有的结构性质不甚相同，因此各种重写模型的扩展都具有自身表达能力的优劣。由于本文的目的是对嵌入式系统进行建模，因此本文主要讨论较适合于系统建模的项重写模型（以下简称“重写模型”）。
 
-另一个方向是对规则及其应用策略进行扩展。如果规则两边的表达式互相之间不存在主次关系，则有向的规则将变得毫无意义。这时候我们需要引入等价关系。模重写模型~\cite{DBLP:journals/jacm/PetersonS81} 与类重写模型~\cite{lankford77b}（class rewrite system）就是为了描述等价关系而产生的重写模型的扩展，其主要区别在于规则应用策略的不同。范式重写模型~\cite{DBLP:conf/csl/JouannaudL12}（normal rewrite system）和重写逻辑~\cite{DBLP:journals/tcs/Marte-OlietM02,DBLP:journals/jlp/Meseguer12} 分别基于模重写模型和类重写模型，进一步增加了其中等价关系的表达能力。另一方面，条件重写模型~\cite{DBLP:conf/ctrs/Gramlich94} 在规则中增加了条件约束，使其能描述重写规则应用时应满足的约束条件。然而，针对真实系统中的确定性和非确定性行为，目前还没有很好的解决方案能对其进行区分描述。
+另一个方向是对规则及其应用策略进行扩展。经典重写模型的操作规则是\emph{有向的}，但如果规则两边的表达式之间不存在主次关系，则有向的规则将变得毫无意义。这时候我们需要引入等价关系。\emph{模重写模型}~\cite{DBLP:journals/jacm/PetersonS81} 与\emph{类重写模型}~\cite{lankford77b}（class rewrite system）就是为了描述等价关系而产生的重写模型的扩展，两者的主要区别在于规则应用策略的不同。\emph{范式重写模型}~\cite{DBLP:conf/csl/JouannaudL12}（normal rewrite system）和\emph{重写逻辑}~\cite{DBLP:journals/tcs/Marte-OlietM02,DBLP:journals/jlp/Meseguer12} 分别基于模重写模型和类重写模型，通过增加有向规则对等价关系进行描述，进一步提高了模型对等价关系的表达能力。另一方面，\emph{条件重写模型}~\cite{DBLP:conf/ctrs/Gramlich94} 在规则中增加了条件约束，使其能描述重写规则应用时应满足的约束条件，从而对真实系统中的控制流具备了更灵活的支持。然而，针对确定性和非确定性行为，目前还没有很好的解决方案能对其进行区分描述。
 
-本文提出的规范化条件重写模型及其重写策略，主要就是为了在模型层面区分确定性行为与非确定性行为，使建模者在应用该模型对系统进行建模分析时更加方便，更加具有针对性。
+本文提出的规范化条件重写模型及对应的重写策略，目的在于在模型层面区分确定性行为与非确定性行为，使建模人员在应用该模型对系统进行建模分析时更加方便、更加具有针对性，也为验证工具对两类行为的分析奠定了基础。
 
 \section{重写模型} 
 \label{s:rewritesystem}
 
-作为一种计算模型，重写模型包含两个部分——操作对象与操作规则。重写模型的操作对象称为\emph{项表达式}，它的操作规则称为\emph{重写规则}。
+作为一种计算模型，从语法的角度看，重写模型包含两个部分——操作对象与操作规则。本文讨论的重写模型，其操作对象称为\emph{项表达式}（term），操作规则称为\emph{重写规则}（rewrite rule）。 
 
 \subsection{项表达式}
 
 项表达式是重写模型讨论、操作的对象，它是一个抽象的、非解释性的代数表达式。
 
-\emph{词汇表}是一个\emph{函数符号}集合，记作 $\cF$。其中的每一个函数符号$f\in\cF$都具有固定的\emph{元数} $n$（$n\ge 0$），即该函数符号所需\emph{参数}的数量。元数为 $n$ 的函数符号 $f$记作$f^{(n)}$；当$n$可从上下文推断确定时，$f^{(n)}$可简写成$f$。元数为 $0$ 的函数符号称为\emph{常数}。
+\emph{词汇表}（signature）是一个\emph{函数符号}（function symbol）集合，记作 $\cF$。其中的每一个函数符号 $f\in\cF$ 都具有固定的\emph{元数} $n$（$n\ge 0$），即该函数符号所需\emph{参数} 的数量。元数为 $n$ 的函数符号 $f$ 记作 $f^{(n)}$；当 $n$ 可从上下文推断确定时，$f^{(n)}$ 可简写成 $f$。元数为 $0$ 的函数符号称为\emph{常数}。
 
-当给定一个词汇表和一个\emph{变量（符号）}集合时，我们可以采用如下归纳方式来定义一个项表达式的集合。
+当给定一个词汇表和一个\emph{变量（符号）} 集合时，我们可以采用如下归纳方式来定义一个项表达式的集合。
 
 \begin{definition}[项表达式]
 \label{d:term}
-假定一个词汇表$\cF$和一个可数的变量（符号）集合$\cX$，由$\cF$和$\cX$构建的项表达式集合$\TFX$由以下语法规则定义：
+假定一个词汇表 $\cF$ 和一个可数的变量（符号）集合 $\cX$，由 $\cF$ 和 $\cX$ 构建的项表达式集合 $\TFX$ 由以下语法规则定义：
 \begin{eqnarray}
     \TFX & ::= & x ~\mid~ f^{(n)}(t_1,t_2,\ldots,t_n) \nonumber 
 \end{eqnarray}
-其中$x\in\cX$，$f^{(n)}\in\cF$，$t_1,t_2,\ldots,t_n\in\TFX$。
+其中 $x\in\cX$，$f^{(n)}\in\cF$，$t_1,t_2,\ldots,t_n\in\TFX$。
 \end{definition}
 
 下面我们举一个用来表示自然数集合的项表达式集合的例子。
 
 \begin{example}
 \label{e:nat}
-假定$\cF = \{\zero^{(0)}, \s^{(1)}\}$，$\cX=\{x,y,z,\ldots\}$，则$\zero$、$\s(\zero)$、$\s(\s(\zero))$、$\s(\s(x))$都是属于$\TFX$的项表达式。
+假定 $\cF = \{\zero^{(0)}, \s^{(1)}\}$，$\cX=\{x,y,z,\ldots\}$，则 $\zero$、$\s(\zero)$、$\s(\s(\zero))$、$\s(\s(x))$ 都是属于 $\TFX$ 的项表达式。
 \end{example}
 
 需要注意，项表达式只是一个抽象的语法表达式，它本身并不蕴含任何语义信息。但我们可以人为地赋予它某种语义，并且通过定义基于项表达式的规则或等式，将其语义反映出来。在
-例~\ref{e:nat} 中，函数符号$\zero$可以看作是自然数$0$，而$\s$表示它的参数$x$的后继，即$x$的下一个自然数$x+1$。于是例~\ref{e:nat} 只利用两个抽象的函数符号$\zero$和$\s$，构造出可以表示全体自然数的项表达式集合$\TFX$，因为任意一个自然数，要么为$0$，即$\zero$，要么为某个自然数$x$的后继，即$\s(x)$。这就是 Peano 代数~\cite{Kaye1991-KAYMOP}中对于自然数的表示方法。
+例~\ref{e:nat} 中，函数符号 $\zero$ 可以看作是自然数 $0$，而 $\s$ 表示它的参数 $x$ 的后继，即 $x$ 的下一个自然数 $x+1$。于是例~\ref{e:nat} 只利用两个抽象的函数符号 $\zero$ 和 $\s$，构造出可以表示全体自然数的项表达式集合 $\TFX$——因为任意一个自然数，要么为 $0$，即 $\zero$，要么为某个自然数 $x$ 的后继，即 $\s(x)$。这就是 Peano 代数~\cite{Kaye1991-KAYMOP} 中对于自然数的表示方法。
 
-另外需要注意，这里所讨论的变量，也是语法意义上的抽象符号。这与我们一般所指的指令式编程语言（如 C 语言）中的变量不一样，不会“储存”具体的“值”。一个带有变量的项表达式，如$\s(\s(x))$，它可以被看作是一个项表达式，也可以被看作是一个项表达式的\emph{模式}，即表示形如$\s(\s(x))$的所有项表达式，比如$\s(\s(\zero))$、$\s(\s(\s(\zero)))$以及$\s(\s(\s(y))$，但$\s(\zero)$不能被$\s(\s(x))$所表示。关于模式及其\emph{实例}的概念，后文会有准确的定义。
+另外需要注意，这里所讨论的变量，也是语法意义上的抽象符号。这与我们一般所指的指令式编程语言（如 C 语言）中的变量不一样，不会“储存”具体的“值”。一个带有变量的项表达式，如 $\s(\s(x))$，它可以被看作是一个项表达式，也可以被看作是一个项表达式的\emph{模式}（pattern），即表示形如 $\s(\s(x))$ 的所有项表达式，比如 $\s(\s(\zero))$、$\s(\s(\s(\zero)))$ 以及 $\s(\s(\s(y))$，但 $\s(\zero)$ 不能被 $\s(\s(x))$ 所表示。关于模式及其\emph{实例} 的概念，后文会有准确的定义。
 
-在接下来的讨论及所有例子中，我们假定使用同一个可数的变量集合$\cX=\{x,y,z,\ldots\}$，不再对每个例子进行复述。
+在接下来的讨论及所有例子中，我们假定使用同一个可数的变量集合 $\cX=\{x,y,z,\ldots\}$，不再对每个例子进行复述。
 
-为了记号简洁，对于任意一元函数符号$f^{(1)}\in\cF$，我们定义
+为了记号简洁，对于任意一元函数符号 $f^{(1)}\in\cF$，我们定义
 \begin{eqnarray}
     f^0(t) & \defeq & t \, ,     \nonumber \\
     f^{n+1}(t) & \defeq & f(f^n(t)) \, ,\nonumber 
 \end{eqnarray}
-其中$n\ge 0$，$t\in\TFX$。
+其中 $n\ge 0$，$t\in\TFX$。
 
-因此在例~\ref{e:nat} 中，$\s(\zero)$可简写成$\s^1(\zero)$，代表自然数$1$；$\s(\s(\zero))$可简写成$\s^2(\zero)$，代表自然数$2$。
+因此在例~\ref{e:nat} 中，$\s(\zero)$ 可简写成 $\s^1(\zero)$，代表自然数 $1$；$\s(\s(\zero))$ 可简写成 $\s^2(\zero)$，代表自然数 $2$。
 
-一个项表达式$t$可以看作是一棵带标记的有序树，它的叶子结点被变量或常数标记，它的分支结点被元数不为零的函数符号标记。
+一个项表达式 $t$ 可以看作是一棵带标记的有序树，它的叶子结点被变量或常数标记，它的分支结点被元数不为零的函数符号标记。
 
 \begin{example}
 \label{e:term-tree}
-假定$\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}\}$。项表达式$\add(x,y)$、$\add(\s(\zero), x)$可分别用以下两棵树来表示：
+假定 $\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}\}$。项表达式 $\add(x,y)$、$\add(\s(\zero), x)$ 可分别用以下两棵树来表示：
 
 \medskip
 \centering
@@ -100,10 +100,10 @@
 假设有序树的每条边都被一个正整数标记，则一个正整数序列可以用来表示该有序树上从根结点开始的一条路径，从而表示该有序树上的一个结点的位置。
 
 \begin{definition}[位置]
-位置是一个由正整数组成的有限序列，表示成$n_1\cdot n_2\cdot\ldots\cdot n_m$，空序列记作$\rootp$。位置的集合用$\cP$表示。
+位置是一个由正整数组成的有限序列，表示成 $n_1\cdot n_2\cdot\ldots\cdot n_m$，空序列记作 $\rootp$。位置的集合用 $\cP$ 表示。
 \end{definition}
 
-如果标记在有序树某条边上的正整数$n$表示的是该边连接的子结点是该边连接的父结点的第$n$个子结点，那么可以定义一个映射$subterm : \TFX \times \cP \ra \TFX\cup\{\bot\}$，其中$\bot\not\in\TFX$表示一个不合法的项表达式：
+如果标记在有序树某条边上的正整数 $n$ 表示的是该边连接的子结点是该边连接的父结点的第 $n$个子结点，那么可以定义一个映射 $subterm : \TFX \times \cP \ra \TFX\cup\{\bot\}$，其中 $\bot\not\in\TFX$ 表示一个不合法的项表达式：
 \begin{eqnarray}
   subterm(t, \rootp) & \defeq & t  \nonumber \\
   subterm(x,\, i\cdot p) & \defeq & \bot  \nonumber \\
@@ -111,7 +111,7 @@
   subterm(f(t_1,\ldots,t_n),\, i\cdot p) & \defeq & subterm(t_i, p) \nonumber \\
   subterm(f(t_1,\ldots,t_n),\, j\cdot p) & \defeq & \bot \nonumber
 \end{eqnarray}
-其中$x\in\cX$，$f\in\cF$，$t,t_1,\ldots,t_n\in\TFX$，$1\le i\le n$，$j > n$，$p\in\cP$。直观上解释，给定项表达式$t$和位置$p$，$subterm(t,p)$表示$t$在位置$p$的\emph{子项表达式}。
+其中 $x\in\cX$，$f\in\cF$，$t,t_1,\ldots,t_n\in\TFX$，$1\le i\le n$，$j > n$，$p\in\cP$。直观上解释，给定项表达式 $t$ 和位置 $p$，$subterm(t,p)$ 表示 $t$ 在位置 $p$ 的\emph{子项表达式}（subterm）。
 
 \begin{example}
 在例~\ref{e:term-tree} 中，
@@ -123,60 +123,60 @@
 \end{eqnarray}
 \end{example}
 
-基于映射$subterm$，可以定义以下关于项表达式的概念及符号。给定项表达式$t$，$\Pos{t}\defeq \{p\mid subterm(t,p)\not=\bot\}$是$t$的所有位置的集合。给定项表达式$t$及位置$p \in \Pos{t}$，$t|_p = subterm(t,p)$是$t$在位置$p$的\emph{子项表达式}。给定项表达式$t,u$和位置$p\in\Pos{t}$，$t[u]_p$表示把$t$里的子项表达式$t|_p$替换为$u$所得到的新的项表达式。
+基于映射 $subterm$，可以定义以下关于项表达式的概念及符号。给定项表达式 $t$，$\Pos{t}\defeq \{p\mid subterm(t,p)\not=\bot\}$ 是 $t$ 的所有位置的集合。给定项表达式 $t$ 及位置 $p \in \Pos{t}$，$t|_p = subterm(t,p)$ 是 $t$ 在位置 $p$ 的\emph{子项表达式}。给定项表达式 $t,u$ 和位置 $p\in\Pos{t}$，$t[u]_p$ 表示把 $t$ 里的子项表达式 $t|_p$ 替换为 $u$ 所得到的新的项表达式。
 
 \begin{definition}[代换]
-代换是从变量集合到项表达式集合的映射。给定词汇表$\cF$和代换$\sigma : \cX \ra \TFX$，代换$\sigma$可以通过以下定义扩展成从项表达式集合到项表达式集合的映射：
+代换（substitution）是从变量集合到项表达式集合的映射。给定词汇表 $\cF$ 和代换 $\sigma : \cX \ra \TFX$，代换 $\sigma$ 可以通过以下定义扩展成从项表达式集合到项表达式集合的映射：
 \begin{eqnarray}
   \sigma(f^{(0)}) & \defeq & f^{(0)}  \nonumber \\
   \sigma(f(t_1,\ldots,t_n)) & \defeq & f(\sigma(t_1),\ldots,\sigma(t_n)) \nonumber
 \end{eqnarray}
-其中$f\in\cF$，$t_1,\ldots,t_n\in\TFX$。
+其中 $f\in\cF$，$t_1,\ldots,t_n\in\TFX$。
 \end{definition}
 
-一个代换$\sigma : \cX\ra\TFX$的\emph{域}定义为$\Dom{\sigma} \defeq \{x\in\cX \mid \sigma(x)\not= x \}$，即域中的变量经过$\sigma$映射后不等于自身。一个代换$\sigma$的域如果只有有限个元素$\{x_1,\ldots,x_n\}$，则可以写作$\sigma = \{x_1\mapsto t_1, \ldots, x_n\mapsto t_n \}$，其中对于$1\le i \le n$有$t_i = \sigma(x_i)$。
+一个代换 $\sigma : \cX\ra\TFX$ 的\emph{域} 定义为 $\Dom{\sigma} \defeq \{x\in\cX \mid \sigma(x)\not= x \}$，即域中的变量经过 $\sigma$ 映射后不等于自身。一个代换$\sigma$ 的域如果只有有限个元素 $\{x_1,\ldots,x_n\}$，则可以写作 $\sigma = \{x_1\mapsto t_1, \ldots, x_n\mapsto t_n \}$，其中对于 $1\le i \le n$ 有 $t_i = \sigma(x_i)$。
 
 \begin{example}
-在例~\ref{e:term-tree} 中，给定$\sigma = \{x\mapsto \s(\zero), y\mapsto \zero\}$，则$\sigma(\add(x,y)) = \add(\s(\zero), \zero)$，$\sigma(\add(\s(\zero), x)) = \add(\s(\zero), \s(\zero))$。
+在例~\ref{e:term-tree} 中，给定 $\sigma = \{x\mapsto \s(\zero), y\mapsto \zero\}$，则 $\sigma(\add(x,y)) = \add(\s(\zero), \zero)$，$\sigma(\add(\s(\zero), x)) = \add(\s(\zero), \s(\zero))$。
 \end{example}
 
-给定项表达式$s$和$t$，如果存在代换$\sigma$使$s=\sigma(t)$，则称$s$是$t$的一个\emph{实例}。我们称计算$\sigma$的过程为\emph{模式匹配}。
+给定项表达式 $s$ 和 $t$，如果存在代换 $\sigma$ 使 $s=\sigma(t)$，则称 $s$ 是 $t$ 的一个\emph{实例}（instance）。我们称计算 $\sigma$ 的过程为\emph{模式匹配}（pattern matching）。
 
 \subsection{重写规则与重写关系}
 
-定义了项表达式作为操作的对象，我们需要定义可用于操作项表达式的工具。如上文已提到，例~\ref{e:nat} 定义了描述自然数集合的项表达式集合。在例~\ref{e:term-tree} 中，如果将词汇表中的函数符号$\add^{(2)}$看作是加号，则例~\ref{e:term-tree} 的项表达式集合可以表示所有定义在自然数上的加法表达式。于是直观上看，$\add(\s(\zero), \zero)$表示的是加法表达式$1+0$。加法表达式可被计算，而项表达式也类似。
+定义了项表达式作为操作的对象，我们需要定义可用于操作项表达式的工具。如前文已提到，例~\ref{e:nat} 定义了描述自然数集合的项表达式集合。在例~\ref{e:term-tree} 中，如果将词汇表中的函数符号 $\add^{(2)}$ 看作是加号，则例~\ref{e:term-tree} 的项表达式集合可以表示所有定义在自然数上的加法表达式。于是直观上看，$\add(\s(\zero), \zero)$ 表示的是加法表达式 $1+0$。加法表达式可被计算，而项表达式也类似。
 
-同时需要注意，$\add$只是抽象的函数符号。虽然它可以被看作加号，当然它也可以被看作是乘号，使得对应的项表达式表示的是乘法表达式。因此，项表达式的“计算”方式，决定了该函数符号可以被解释的方式，即决定了它的语义。
+同时需要注意，$\add$ 只是抽象的函数符号。虽然它可以被看作加号，当然它也可以被看作是乘号，使得对应的项表达式表示的是乘法表达式。因此，项表达式的“计算”方式，决定了该函数符号可以被解释的方式，即决定了它的语义。
 
 \begin{definition}[重写规则]
 \label{d:rule}
-给定词汇表$\cF$，一条重写规则是由项表达式$l,r\in\TFX$组成的有序对（二元组），记作$l\ra r$。其中$l$称作该重写规则的左项，$r$称作该重写规则的右项。
+给定词汇表 $\cF$，一条重写规则是由项表达式 $l,r\in\TFX$ 组成的有序对（二元组），记作 $l\ra r$。其中 $l$ 称作该重写规则的左项，$r$ 称作该重写规则的右项。
 \end{definition}
 
 \begin{definition}[重写模型~\cite{terese}]
 \label{d:rewrite-sys}
-给定词汇表$\cF$，重写模型是一个由若干重写规则组成的集合$\cR = \{l_i \ra r_i\}_i$。
+给定词汇表 $\cF$，重写模型是一个由若干重写规则组成的集合 $\cR = \{l_i \ra r_i\}_i$。
 \end{definition}
 
 \begin{example}
 \label{e:add}
-假定$\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}\}$。可定义以下重写模型：
+假定 $\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}\}$。可定义以下重写模型：
 \begin{eqnarray}
 \cR = \{ &  & \add(\zero, y) \ra y \; , \nonumber \\
          &  & \add(\s(x), y) \ra \s(\add(x,y)) \;\;\; \}\mbox{。} \nonumber
 \end{eqnarray}
 \end{example}
 
-以加法表达式的角度，例~\ref{e:add} 的两条重写规则可以直观地看作：(1) 表达式$0+y$可“计算”成$y$；(2) 表达式$(x+1)+y$可“计算”成$(x+y)+1$。
+以加法表达式的角度，例~\ref{e:add} 的两条重写规则可以直观地看作：(1) 表达式 $0+y$ 可“计算”成 $y$；(2) 表达式 $(x+1)+y$ 可“计算”成 $(x+y)+1$。
 
 准确地、形式化地定义这个过程，则有了\emph{重写}的概念。
 
 \begin{definition}[重写]
 \label{d:rewriting}
-给定重写模型$\cR$，项表达式$u,v\in\TFX$，位置$p\in\Pos{u}$，重写规则$(l \ra r) \in \cR$。如果存在代换$\sigma$满足$u|_p = \sigma(l)$以及$v=u[\sigma(r)]_p$，则称$u$在位置$p$应用重写规则$l\ra r$重写为$v$，记作$u\lrps{p}{l\ra r} v$。记号中的$p$和$l\ra r$可忽略不写。
+给定重写模型 $\cR$，项表达式 $u,v\in\TFX$，位置 $p\in\Pos{u}$，重写规则 $(l \ra r) \in \cR$。如果存在代换 $\sigma$ 满足 $u|_p = \sigma(l)$ 以及 $v=u[\sigma(r)]_p$，则称 $u$ 在位置 $p$ 应用重写规则 $l\ra r$ 重写为 $v$，记作 $u\lrps{p}{l\ra r} v$。记号中的 $p$ 和 $l\ra r$ 可忽略不写。
 \end{definition}
 
-重写的过程可看作规约、化简的过程。它把项表达式$u$中存在的某个左项$l$的实例替换成了右项$r$相对应的实例（相同的代换$\sigma$）。从树的角度来看，重写进行了位置$p$的子树的替换，如图~\ref{f:rewriting}。
+重写的过程可看作归约、化简的过程。它把项表达式 $u$ 中存在的某个左项 $l$ 的实例替换成了右项 $r$ 相对应的实例（相同的代换 $\sigma$）。从树的角度来看，重写进行了位置 $p$ 的子树的替换，如图~\ref{f:rewriting}。
 
 \begin{figure}[htbp]
 \centering
@@ -205,7 +205,7 @@
 \end{figure}
 
 \begin{example}
-利用例~\ref{e:add} 的重写模型$\cR$，可以得到以下重写序列，其中被重写替换的子项表达式（即重写规则左项的实例）用下划线标出：
+利用例~\ref{e:add} 的重写模型 $\cR$，可以得到以下重写序列，其中被重写替换的子项表达式（即重写规则左项的实例）用下划线标出：
 \begin{eqnarray}
 t_1 & = & \underline{\add(\s(\zero),\zero)} \lrps{}{} \s(\underline{\add(\zero,\zero)}) \lrps{}{} \s(\zero) \;\; ;\nonumber \\
 t _2 & = & \underline{\add(\s^2(\zero),\s(\zero))} \lrps{}{} \s(\underline{\add(\s(\zero),\s(\zero))}) \nonumber\\ 
@@ -213,25 +213,25 @@ t _2 & = & \underline{\add(\s^2(\zero),\s(\zero))} \lrps{}{} \s(\underline{\add(
 \end{eqnarray}
 \end{example}
 
-从上例不难看出，例~\ref{e:add} 的重写模型$\cR$定义了自然数加法的计算方式，即通过重写规则赋予了抽象函数符号$\add$自然数加法的语义。由于$\cR$不满足自然数乘法的性质，因此无法将$\add$解释为自然数乘法符号。因此，重写模型通过重写规则给函数符号赋予语义。
+从上例不难看出，例~\ref{e:add} 的重写模型 $\cR$ 定义了自然数加法的计算方式，即通过重写规则赋予了抽象函数符号 $\add$ 自然数加法的语义。由于 $\cR$ 不满足自然数乘法的性质，因此无法将 $\add$ 解释为自然数乘法符号。因此，重写规则的应用方式（即重写）给重写规则规定了语义，而重写规则又给函数符号赋予了语义。
 
-重写可以看作一种计算，也可以看作一种关系。
+重写可以看作一种计算过程，也可以看作一种关系。
 
 \begin{definition}[重写关系]
-给定定义在词汇表$\cF$上的重写模型$\cR$，$\cR$对应的重写关系$\lrps{}{\cR}$定义为$\TFX$上的二元关系：
+给定定义在词汇表 $\cF$ 上的重写模型 $\cR$，$\cR$ 对应的重写关系 $\lrps{}{\cR}$ 定义为 $\TFX$ 上的二元关系：
 \begin{eqnarray}
 \lrps{}{\cR} & \defeq & \{ \lb u,v\rb 
 \mid \mbox{存在$p$和$(l\ra r)\in\cR$，满足$u\lrps{p}{l\ra r}v$}\}  \nonumber 
 \end{eqnarray}
-给定重写关系 $\lrps{}{\cR}$，它的对称闭包记作$\eqps{}{\cR}$，自反传递闭包记作 
-$\lrps{*}{\cR}$，自反对称传递闭包记作$\eqps{*}{\cR}$。
+给定重写关系 $\lrps{}{\cR}$，它的对称闭包记作 $\eqps{}{\cR}$，自反传递闭包记作  
+$\lrps{*}{\cR}$，自反对称传递闭包记作 $\eqps{*}{\cR}$。
 \end{definition}
 
-重写是一种\emph{非确定}的技术。重写的非确定性体现在两个方面：(1) 给定项表达式$t$，重写发生的位置$p$允许是任意的；(2) 给定项表达式$t$，重写应用的重写规则$l \ra r$允许是任意的。例如在例~\ref{e:nondet} 中，从项表达式$t$出发，产生了两条不同的重写序列。第一条序列先在位置$\rootp$（即树的根结点）进行重写，然后继续在位置$\rootp$进行重写；第二条序列则先在位置$2$（即根结点的第2个子结点）进行重写，然后继续在位置$\rootp$进行重写。
+重写是一种\emph{非确定} 的技术。重写的非确定性体现在两个方面：(1) 给定项表达式 $t$，重写发生的位置 $p$ 允许是任意的；(2) 给定项表达式 $t$，重写应用的重写规则 $l \ra r$ 允许是任意的。例如在例~\ref{e:nondet} 中，从项表达式 $t$ 出发，产生了两条不同的重写序列。第一条序列先在位置 $\rootp$（即树的根结点）进行重写，然后继续在位置 $\rootp$ 进行重写；第二条序列则先在位置 $2$（即根结点的第2个子结点）进行重写，然后继续在位置 $\rootp$ 进行重写。
 
 \begin{example}
 \label{e:nondet}
-利用例~\ref{e:add} 的重写模型$\cR$，可以得到以下重写序列：
+利用例~\ref{e:add} 的重写模型 $\cR$，可以得到以下重写序列：
 \begin{eqnarray}
 t & = & \underline{\add(\zero,\add(\zero,x))} \lrps{\rootp}{} 
 \underline{\add(\zero,x)} \lrps{\rootp}{} x \nonumber \\
@@ -240,7 +240,7 @@ t & = & \add(\zero,\underline{\add(\zero,x)}) \lrps{2}{}
 \end{eqnarray}
 \end{example}
 
-重写过程不一定是终止的，即某项表达式$t$可以一直被重写，其过程不会停止。如例~\ref{e:nonter}，利用重写模型$\cR_1$，可以得到无穷的重写序列$a\lrps{}{\cR_1}a\lrps{}{\cR_1} a \lrps{}{\cR} \ldots$；利用重写模型$\cR_2$，可以得到无穷的重写序列$f(a,b) \lrps{}{\cR_2} f(b,a) \lrps{}{\cR_2} f(a,b) \lrps{}{\cR_2} \ldots$。
+重写过程不一定是终止的，即某项表达式 $t$ 可以一直被重写，其过程不会停止。如例~\ref{e:nonter}，利用重写模型 $\cR_1$，可以得到无穷的重写序列 $a\lrps{}{\cR_1}a\lrps{}{\cR_1} a \lrps{}{\cR_1} \ldots$；利用重写模型 $\cR_2$，可以得到无穷的重写序列 $f(a,b) \lrps{}{\cR_2} f(b,a) \lrps{}{\cR_2} f(a,b) \lrps{}{\cR_2} \ldots$。
 
 \begin{example}
 \label{e:nonter}
@@ -256,21 +256,21 @@ t & = & \add(\zero,\underline{\add(\zero,x)}) \lrps{2}{}
 
 \begin{definition}[终止性]
 \label{d:termination}
-给定重写关系$\lrps{}{\cR}$，如果对任意项表达式$t$都不存在无穷的重写序列$t\lrps{}{\cR} t_1 \lrps{}{\cR} t_2 \lrps{}{\cR} \ldots$，则称重写关系$\lrps{}{\cR}$是终止的。重写模型$\cR$是终止的，当且仅当重写关系$\lrps{}{\cR}$是终止的。
+给定重写关系 $\lrps{}{\cR}$，如果对任意项表达式 $t$ 都不存在无穷的重写序列 $t\lrps{}{\cR} t_1 \lrps{}{\cR} t_2 \lrps{}{\cR} \ldots$，则称重写关系 $\lrps{}{\cR}$ 是终止的（terminating）。重写模型 $\cR$ 是终止的，当且仅当重写关系 $\lrps{}{\cR}$ 是终止的。
 \end{definition}
 
 \begin{definition}[范式]
 \label{d:normalform}
-给定重写模型$\cR$，如果项表达式$s$无法应用任意重写规则$(l \ra r)\in \cR$进行重写，则称$s$是（关于$\cR$的）范式。
+给定重写模型 $\cR$，如果项表达式 $s$ 无法应用任意重写规则 $(l \ra r)\in \cR$ 进行重写，则称 $s$ 是（关于 $\cR$ 的）范式。
 \end{definition}
 
 \begin{lemma}
-如果重写模型$\cR$是终止的，那么对任意项表达式$t\in\TFX$，存在范式$s\in\TFX$满足$t\lrps{*}{\cR} s$。此时称$s$是$t$（关于$\cR$）的范式，重写序列$t\lrps{*}{\cR} s$可记作$t\lrps{!}{\cR} s$。求范式的过程称作\emph{规范化}。
+如果重写模型 $\cR$ 是终止的，那么对任意项表达式 $t\in\TFX$，存在范式 $s\in\TFX$ 满足$t\lrps{*}{\cR} s$。此时称 $s$ 是 $t$（关于 $\cR$）的范式，重写序列 $t\lrps{*}{\cR} s$ 可记作 $t\lrps{!}{\cR} s$。求范式的过程称作\emph{规范化}（normalization）。
 \end{lemma}
 
-重写的终止性是重写领域研究的重要问题之一。给定任意一个重写模型$\cR$，判定$\cR$是否终止的问题，是一个\emph{不可判定}的问题~\cite{DBLP:conf/rta/Dauchet89,tech1978}。重写模型的终止性问题不是本文讨论的内容，在此不详述，更多探讨可参考~\inlinecite{terese,DBLP:conf/rta/1995,DBLP:journals/iandc/GeserHWZ07,DBLP:journals/tcs/Payet08,DBLP:journals/tcs/Lescanne94,DBLP:conf/tlca/JouannaudL15}。
+重写的终止性是重写领域研究的重要问题之一。给定任意一个重写模型 $\cR$，判定 $\cR$ 是否终止的问题，是一个\emph{不可判定}（undecidable） 的问题~\cite{DBLP:conf/rta/Dauchet89,tech1978}。重写模型的终止性问题不是本文讨论的主题，在此不详述，更多探讨可参考文献~\inlinecite{terese,DBLP:conf/rta/1995,DBLP:journals/iandc/GeserHWZ07,DBLP:journals/tcs/Payet08,DBLP:journals/tcs/Lescanne94,DBLP:conf/tlca/JouannaudL15}。
 
-由于重写的非确定性，即使重写模型是终止的，任意项表达式的范式也不一定是唯一的。如例~\ref{e:diffnorm}，根据$\cR$，有$a\lrps{!}{\cR} b$以及$a \lrps{!}{\cR}c$，即$b$和$c$都是关于$\cR$的$a$的范式，可见$a$的范式并不唯一。
+由于重写的非确定性，即使重写模型是终止的，任意项表达式的范式也不一定是唯一的。如例~\ref{e:diffnorm}，根据 $\cR$，有 $a\lrps{!}{\cR} b$ 以及 $a \lrps{!}{\cR}c$，即 $b$ 和 $c$ 都是关于 $\cR$ 的 $a$ 的范式，可见 $a$ 的范式并不唯一。
 
 \begin{example}
 \label{e:diffnorm}
@@ -282,56 +282,56 @@ t & = & \add(\zero,\underline{\add(\zero,x)}) \lrps{2}{}
 
 \begin{definition}[合流性]
 \label{d:confluence}
-给定重写关系$\lrps{}{\cR}$，如果对任意满足$u\rlps{*}{\cR} s \lrps{*}{\cR} v$的项表达式$s,u,v$，都存在$t$使$u\lrps{*}{\cR} t \rlps{*}{\cR} v$，则称$\lrps{}{\cR}$是合流的。重写模型$\cR$是合流的，当且仅当重写关系$\lrps{}{\cR}$是合流的。
+给定重写关系 $\lrps{}{\cR}$，如果对任意满足 $u\rlps{*}{\cR} s \lrps{*}{\cR} v$ 的项表达式 $s,u,v$，都存在 $t$ 使 $u\lrps{*}{\cR} t \rlps{*}{\cR} v$，则称 $\lrps{}{\cR}$ 是合流的（confluent）。重写模型 $\cR$ 是合流的，当且仅当重写关系 $\lrps{}{\cR}$ 是合流的。
 \end{definition}
 
-重写的合流性也是重写领域研究的重要问题之一。给定任意一个重写模型$\cR$，判定$\cR$是否合流的问题，也是一个不可判定的问题~\cite{DBLP:journals/ipl/Jacquemard03}。与终止性类似，重写模型的合流性问题不是本文讨论的内容，在此不详述，更多探讨可参考~\inlinecite{terese,newman42,hindley1964church,DBLP:journals/jacm/Rosen73,knuth70,DBLP:conf/rta/Oostrom08,DBLP:journals/jar/ZanklFM15,DBLP:conf/csl/LiuJO15,DBLP:conf/rta/LiuDJ14}。
+重写的合流性也是重写领域研究的重要问题之一。给定任意一个重写模型 $\cR$，判定 $\cR$ 是否合流的问题，也是一个不可判定的问题~\cite{DBLP:journals/ipl/Jacquemard03}。与终止性类似，重写模型的合流性问题不是本文讨论的重点，在此不详述，更多探讨可参考文献~\inlinecite{terese,newman42,hindley1964church,DBLP:journals/jacm/Rosen73,knuth70,DBLP:conf/rta/Oostrom08,DBLP:journals/jar/ZanklFM15,DBLP:conf/csl/LiuJO15,DBLP:conf/rta/LiuDJ14}。
 
-把重写看作计算的过程，终止性保证计算结果存在，而合流性保证计算结果唯一，即计算过程的非确定性不影响计算结果的确定性。
+需要注意的是，把重写看作计算的过程，终止性保证计算结果存在，而合流性保证计算结果唯一，即计算过程的非确定性不影响计算结果的确定性。
 
 \begin{lemma}
-如果重写模型$\cR$是终止的且合流的，那么任意项表达式$t$关于$\cR$的范式存在且唯一，记作$\nf{t}{\cR}$。在$\cR$已知的情况下，简记作$\nf{t}{}$。
+如果重写模型 $\cR$ 是终止的且合流的，那么任意项表达式 $t$ 关于 $\cR$ 的范式存在且唯一，记作 $\nf{t}{\cR}$。在 $\cR$ 已知的情况下，简记作 $\nf{t}{}$。
 \end{lemma}
 
 
 
 \subsection{等式规则与等价关系}
 
-重写规则是有方向性的，因此重写是不可逆的过程。给定$s\lrps{}{\cR}t$，$s$和$t$处于不等价的关系。然而在某些情况下，我们需要描述两个项表达式之间等价的关系。例如针对例~\ref{e:add} 的重写模型，项表达式$\add(x,\zero)$已经是自身的范式，$\add(x,\zero) = \nf{\add(x,\zero)}{}$。但正如之前的描述，我们想赋予$\add$自然数加法的语义。我们知道交换律是自然数加法具有的性质，在此意义上，我们认为项表达式$\add(x,\zero)$应该可以进一步化简为$x$。因此交换律的语义应该以形如$\add(x,y)\ra\add(y,x)$的重写规则被加入到该重写模型中。然而，从例~\ref{e:nonter} 的$\cR_2$可以看出，这种形式的重写规则会破坏重写模型的终止性。
+重写规则是有方向性的，因此重写是不可逆的过程。给定 $s\lrps{}{\cR}t$，$s$ 和 $t$ 处于不等价的关系。然而在某些情况下，我们需要描述两个项表达式之间等价的关系。例如针对例~\ref{e:add} 的重写模型，项表达式 $\add(x,\zero)$ 已经是自身的范式，即 $\add(x,\zero) = \nf{\add(x,\zero)}{}$。但正如之前的描述，我们想赋予 $\add$ 自然数加法的语义。我们知道交换律是自然数加法具有的性质，在此意义上，我们认为项表达式 $\add(x,\zero)$ 应该可以进一步化简为 $x$。因此交换律的语义应该以形如 $\add(x,y)\ra\add(y,x)$ 的重写规则被加入到该重写模型中。然而，从例~\ref{e:nonter} 的 $\cR_2$ 可以看出，这种形式的重写规则会破坏重写模型的终止性，从而破坏“计算”的终止性。
 
-为此，需要引入等式规则与等价关系的概念。
+为此，需要引入等式规则（equation）与等价关系的概念。
 
 \begin{definition}[等式规则]
 \label{d:eq}
-给定词汇表$\cF$，一条等式规则是由项表达式$l,r\in\TFX$组成的无序对（无序二元组），记作$l\sim r$。
+给定词汇表 $\cF$，一条等式规则是由项表达式 $l,r\in\TFX$ 组成的无序对（无序二元组），记作 $l\sim r$。
 \end{definition}
 
 \begin{definition}[等价模型~\cite{DBLP:journals/jacm/PetersonS81}]
 \label{d:eq-sys}
-给定词汇表$\cF$，等价模型是一个由若干等式规则组成的集合$\cE = \{l_i \sim r_i\}_i$。
+给定词汇表 $\cF$，等价模型是一个由若干等式规则组成的集合 $\cE = \{l_i \sim r_i\}_i$。
 \end{definition}
 
-由于等式规则是无序对，因此$l\sim r$等同于$r\sim l$。$(l\sim r)\in\cE$当且仅当$(r\sim l)\in\cE$。
+由于等式规则是无序对，因此 $l\sim r$ 等同于 $r\sim l$。$(l\sim r)\in\cE$ 当且仅当 $(r\sim l)\in\cE$。
 
 \begin{example}
 \label{e:add-ac}
-假定$\cF = \{\add^{(2)}\}$。可定义以下等价模型：
+假定 $\cF = \{\add^{(2)}\}$。可定义以下等价模型：
 \begin{eqnarray}
 \cE = \{ &  & \add(x, y) \sim \add(y,x) \; , \nonumber \\
          &  & \add(\add(x,y), z) \sim \add(x,\add(y,z)) \;\;\; \}\mbox{。} \nonumber
 \end{eqnarray}
 \end{example}
 
-例~\ref{e:add-ac} 的规则分别定义了函数符号$\add$的交换律和结合律。
+例~\ref{e:add-ac} 的规则分别定义了函数符号 $\add$ 的交换律和结合律。
 
 应用等式规则的方式与应用重写规则的方式类似：
 
 \begin{definition}[等价]
 \label{d:equality}
-给定等价模型$\cE$，项表达式$u,v\in\TFX$，位置$p\in\Pos{u}$，等式规则$(l \sim r) \in \cE$。如果存在代换$\sigma$满足$u|_p = \sigma(l)$以及$v=u[\sigma(r)]_p$，则称$u$和$v$在位置$p$关于等式规则$l\sim r$等价，记作$u\eqps{p}{l\sim r} v$。记号中的$p$和$l\sim r$可忽略不写。
+给定等价模型 $\cE$，项表达式 $u,v\in\TFX$，位置 $p\in\Pos{u}$，等式规则 $(l \sim r) \in \cE$。如果存在代换 $\sigma$ 满足 $u|_p = \sigma(l)$ 以及 $v=u[\sigma(r)]_p$，则称 $u$ 和 $v$ 在位置 $p$ 关于等式规则 $l\sim r$ 等价，记作 $u\eqps{p}{l\sim r} v$。记号中的 $p$ 和 $l\sim r$ 可忽略不写。
 \end{definition}
 
-记号$\eqps{}{}$表明了应用等式规则的过程是个对称、可逆的过程。
+由于 $(l\sim r)\in\cE$ 当且仅当 $(r\sim l)\in\cE$，因此 $u\eqps{p}{} v$ 成立当且仅当 $v\eqps{p}{} u$ 成立。记号 $\eqps{}{}$ 表明了应用等式规则的过程是个对称、可逆的过程。
 
 \begin{example}
 利用例~\ref{e:add-ac} 的等价模型，可得到以下等价序列：
@@ -342,7 +342,7 @@ t & = & \add(\zero,\underline{\add(\zero,x)}) \lrps{2}{}
 
 \begin{definition}[等价关系]
 \label{d:equiv}
-给定定义在词汇表$\cF$上的等价模型$\cE$，$\cE$对应的等价关系$\eqps{}{\cE}$定义为$\TFX$上的二元关系：
+给定定义在词汇表 $\cF$ 上的等价模型 $\cE$，$\cE$ 对应的等价关系 $\eqps{}{\cE}$ 定义为 $\TFX$ 上的二元关系：
 \begin{eqnarray}
 \eqps{}{\cE} & \defeq & \{ \lb u,v\rb 
 \mid \mbox{存在$p$和$(l\sim r)\in\cE$，满足$u\eqps{p}{l\sim r}v$}\}  \nonumber 
@@ -351,30 +351,32 @@ t & = & \add(\zero,\underline{\add(\zero,x)}) \lrps{2}{}
 $\eqps{*}{\cE}$。
 \end{definition}
 
-由于等价关系是对称的，任意等价关系$u\eqps{}{\cE}v$都可以扩展成一个无穷等价序列$u\eqps{*}{\cE}v$。因此区分等价关系$\eqps{}{\cE}$及其自反传递闭包$\eqps{*}{\cE}$并无意义。我们将$u\eqps{*}{\cE}v$记作$u=_{\cE}v$。
+由于等价关系是对称的，任意等价关系 $u\eqps{}{\cE}v$ 都可以扩展成一个无穷等价序列 $u\eqps{*}{\cE}v$。因此区分等价关系 $\eqps{}{\cE}$ 及其自反传递闭包 $\eqps{*}{\cE}$ 并无实际意义。我们将 $u\eqps{*}{\cE}v$ 记作 $u=_{\cE}v$。
 
 \section{重写模型的扩展}
 \label{s:rs-ext}
 
+本小节介绍重写模型的两种经典扩展：(1) \emph{模重写模型}，能描述等价关系的重写模型；(2) \emph{条件重写模型}，能描述条件控制的重写模型。
+
 \subsection{模重写}
 
-等价关系为抽象的函数符号赋予了“等价”的语义。等价关系的引入，是为了增强重写的能力。\emph{模重写}技术的目的就是定义一种二者融合的方式。
+等价关系为抽象的函数符号赋予了“等价”的语义。等价关系的引入，是为了增强重写的能力。Peterson 和 Stickel 提出 \emph{模重写} 技术的目的就是定义一种二者融合的方式。
 
 \begin{definition}[模重写模型~\cite{DBLP:journals/jacm/PetersonS81}]
 \label{d:rewsys-modulo}
-给定词汇表$\cF$，模重写模型是一个由重写模型$\cR$和等价模型$\cE$组成的有序对（二元组），记作$\cR_{\cE} \defeq \lb \cR, \cE \rb$。
+给定词汇表 $\cF$，模重写模型是一个由重写模型 $\cR$ 和等价模型 $\cE$ 组成的有序对（二元组），记作 $\cR_{\cE} \defeq \lb \cR, \cE \rb$。
 \end{definition}
 
 \begin{definition}[模重写]
 \label{d:rewriting-modulo}
-给定模重写模型$\RE$，项表达式$u,v\in\TFX$，位置$p\in\Pos{u}$，重写规则$(l \ra r) \in \cR$。如果存在代换$\sigma$满足$u|_p =_{\cE} \sigma(l)$以及$v=u[\sigma(r)]_p$，则称$u$在位置$p$应用重写规则$l\ra r$模重写为$v$，记作$u\lrps{p}{(l\ra r)_{\cE}} v$。记号中的$p$和$(l\ra r)_{\cE}$可忽略不写。
+给定模重写模型 $\RE$，项表达式 $u,v\in\TFX$，位置 $p\in\Pos{u}$，重写规则 $(l \ra r) \in \cR$。如果存在代换 $\sigma$ 满足 $u|_p =_{\cE} \sigma(l)$ 以及 $v=u[\sigma(r)]_p$，则称 $u$ 在位置 $p$ 应用重写规则 $l\ra r$ 模重写为 $v$，记作 $u\lrps{p}{(l\ra r)_{\cE}} v$。记号中的 $p$ 和 $(l\ra r)_{\cE}$ 可忽略不写。
 \end{definition}
 
-重写技术替换的是项表达式$u$中存在的规则左项的实例$\sigma(l)$，而模重写技术替换的则是$u$中与规则左项实例$\sigma(l)$关于$\cE$等价的子项表达式。这使得重写过程得以“利用”各函数符号的等价语义。
+重写技术替换的是项表达式 $u$ 中存在的规则左项的实例 $\sigma(l)$，而模重写技术替换的则是 $u$ 中与规则左项实例 $\sigma(l)$ 关于 $\cE$ 等价的子项表达式。这使得重写过程得以“利用”各函数符号的等价语义。
 
 \begin{example}
 \label{e:add-ac-mod}
-假定$\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}\}$。可定义模重写模型$\RE$，其中：
+假定 $\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}\}$。可定义模重写模型 $\RE$，其中：
 \begin{eqnarray}
 \cR = \{ &  & \add(\zero, y) \ra y \; , \nonumber \\
          &  & \add(\s(x), y) \ra \s(\add(x,y)) \;\;\; \}\;\; ; \nonumber \\
@@ -389,91 +391,95 @@ t _2 & = & \underline{\add(\add(x,\s(\zero)),y)} \lrps{}{} \s(\underline{\add(\z
 \end{eqnarray}
 \end{example}
 
+需要注意的是，给定重写模型 $\cR$ 和等价模型 $\cE$，模重写只定义了二者规则应用的其中一种方式，即规定了模重写模型的特定的语义。利用别的规则应用策略，还可以得到不同的模型语义，例如 Lankford 和 Ballantyne 提出的\emph{类重写模型}~\cite{lankford77b}。
+
 类似于重写，我们可以定义模重写对应的模重写关系、终止性、范式和合流性。
 
 \begin{definition}[模重写关系]
-给定定义在词汇表$\cF$上的模重写模型$\RE$，$\RE$对应的模重写关系$\lrps{}{\RE}$定义为$\TFX$上的二元关系：
+给定定义在词汇表 $\cF$ 上的模重写模型 $\RE$，$\RE$ 对应的模重写关系 $\lrps{}{\RE}$ 定义为 $\TFX$ 上的二元关系：
 \begin{eqnarray}
 \lrps{}{\RE} & \defeq & \{ \lb u,v\rb 
 \mid \mbox{存在$p$和$(l\ra r)\in\cR$，满足$u\lrps{p}{(l\ra r)_{\cE}}v$}\}  \nonumber 
 \end{eqnarray}
-给定模重写关系 $\lrps{}{\RE}$，它的对称闭包记作$\eqps{}{\RE}$，自反传递闭包记作 
-$\lrps{*}{\RE}$，自反对称传递闭包记作$\eqps{*}{\RE}$。
+给定模重写关系 $\lrps{}{\RE}$，它的对称闭包记作 $\eqps{}{\RE}$，自反传递闭包记作 
+$\lrps{*}{\RE}$，自反对称传递闭包记作 $\eqps{*}{\RE}$。
 \end{definition}
 
 \begin{definition}
-给定模重写关系$\lrps{}{\RE}$，如果对任意项表达式$t$都不存在无穷的模重写序列$t\lrps{}{\RE} t_1 \lrps{}{\RE} t_2 \lrps{}{\RE} \ldots$，则称模重写关系$\lrps{}{\RE}$是终止的。模重写模型$\RE$是终止的，当且仅当模重写关系$\lrps{}{\RE}$是终止的。
+给定模重写关系 $\lrps{}{\RE}$，如果对任意项表达式 $t$ 都不存在无穷的模重写序列 $t\lrps{}{\RE} t_1 \lrps{}{\RE} t_2 \lrps{}{\RE} \ldots$，则称模重写关系 $\lrps{}{\RE}$ 是终止的。模重写模型 $\RE$ 是终止的，当且仅当模重写关系 $\lrps{}{\RE}$ 是终止的。
 \end{definition}
 
 \begin{definition}
-给定模重写模型$\RE$，如果项表达式$s$无法应用任意重写规则$(l \ra r)\in \cR$进行模重写，则称$s$是（关于$\RE$的）范式。
+给定模重写模型 $\RE$，如果项表达式 $s$ 无法应用任意重写规则 $(l \ra r)\in \cR$ 进行模重写，则称 $s$ 是（关于 $\RE$ 的）范式。
 \end{definition}
 
 \begin{lemma}
-如果模重写模型$\RE$是终止的，那么对任意项表达式$t\in\TFX$，存在范式$s\in\TFX$满足$t\lrps{*}{\RE} s$。此时称$s$是$t$（关于$\RE$）的范式，模重写序列$t\lrps{*}{\RE} s$可记作$t\lrps{!}{\RE} s$。
+如果模重写模型 $\RE$ 是终止的，那么对任意项表达式 $t\in\TFX$，存在范式 $s\in\TFX$ 满足 $t\lrps{*}{\RE} s$。此时称 $s$ 是 $t$（关于 $\RE$）的范式，模重写序列 $t\lrps{*}{\RE} s$ 可记作 $t\lrps{!}{\RE} s$。
 \end{lemma}
 
 \begin{definition}
-给定模重写关系$\lrps{}{\RE}$，如果对任意满足$u\rlps{*}{\RE} s \lrps{*}{\RE} v$的项表达式$s,u,v$，都存在$t$和$t'$使$u\lrps{*}{\RE} t =_{\cE} t' \rlps{*}{\RE} v$，则称$\lrps{}{\RE}$是合流的。模重写模型$\RE$是合流的，当且仅当模重写关系$\lrps{}{\RE}$是合流的。
+给定模重写关系 $\lrps{}{\RE}$，如果对任意满足 $u\rlps{*}{\RE} s \lrps{*}{\RE} v$ 的项表达式 $s,u,v$，都存在 $t$ 和 $t'$ 使 $u\lrps{*}{\RE} t =_{\cE} t' \rlps{*}{\RE} v$，则称 $\lrps{}{\RE}$ 是合流的。模重写模型 $\RE$ 是合流的，当且仅当模重写关系 $\lrps{}{\RE}$ 是合流的。
 \end{definition}
 
 \begin{lemma}
-如果模重写模型$\RE$是终止的且合流的，那么任意项表达式$t$关于$\RE$的范式存在且关于$\cE$等价。也就是说，如果$t\lrps{!}{\RE} s_1$，$t\lrps{!}{\RE} s_2$，那么$s_1 =_{\cE} s_2$。 此时也可称$t$关于$\RE$的范式关于$=_{\cE}$唯一，将任一范式记作$\nf{t}{\RE}$。在$\RE$已知的情况下，简记作$\nf{t}{}$。
+\label{l:convergence}
+如果模重写模型 $\RE$ 是终止的且合流的，那么任意项表达式 $t$ 关于 $\RE$ 的范式存在且关于 $\cE$ 等价。也就是说，如果 $t\lrps{!}{\RE} s_1$，$t\lrps{!}{\RE} s_2$，那么$s_1 =_{\cE} s_2$。 此时也可称 $t$ 关于 $\RE$ 的范式关于 $=_{\cE}$ 唯一，将任一范式记作 $\nf{t}{\RE}$。在 $\RE$ 已知的情况下，简记作 $\nf{t}{}$。
 \end{lemma}
 
-模重写技术可以看作是将重写技术中的语法等价（相等关系$=$）扩展为语义等价（等价关系$=_{\cE}$）。重写模型是模重写模型的等价关系$=_{\cE}$为空时的特殊情况，即$\cR = \cR_{\emptyset}$。关于模重写的终止性和合流性的研究，可参考\inlinecite{terese,DBLP:conf/cade/JouannaudM84,DBLP:journals/tcs/JouannaudM92,DBLP:journals/ijsi/JouannaudT08,DBLP:conf/rta/Jouannaud06,DBLP:journals/tcs/JouannaudL12,DBLP:journals/siamcomp/JouannaudK86}。
+模重写技术可以看作是将重写技术中的语法等价（相等关系 $=$）扩展为语义等价（等价关系 $=_{\cE}$）。重写模型是模重写模型的等价关系 $=_{\cE}$ 为空时的特例，即 $\cR = \cR_{\emptyset}$。关于模重写的终止性和合流性的研究，可参考文献~\inlinecite{terese,DBLP:conf/cade/JouannaudM84,DBLP:journals/tcs/JouannaudM92,DBLP:journals/ijsi/JouannaudT08,DBLP:conf/rta/Jouannaud06,DBLP:journals/tcs/JouannaudL12,DBLP:journals/siamcomp/JouannaudK86}。
 
 
 \subsection{条件重写}
 
-对于标准的重写技术，触发重写的条件是通过模式匹配体现的。假如给定形如$f(x)$的项表达式，我们希望当$x\ge 2$时，$f(x)$可以重写为$a$；当$x<2$时，$f(x)$可以重写为$b$。那么根据例~\ref{e:add}，我们需要增加如下规则：
+对于标准的重写技术，触发重写的条件是模式匹配成功。假如给定形如 $f(x)$ 的项表达式，我们希望当 $x\ge 2$ 时，$f(x)$ 可以重写为 $a$；当 $x<2$ 时，$f(x)$ 可以重写为 $b$。那么根据例~\ref{e:add}，我们需要增加如下规则：
 \begin{eqnarray}
 f(\s^2(x)) & \ra & a \nonumber \\
 f(\zero)  & \ra & b \nonumber \\
 f(\s(\zero)) & \ra & b \nonumber
 \end{eqnarray}
-如果判断是否满足$x\ge 3$，则右项为$b$的规则需要增加至3条；以此类推，如果判断是否满足$x\ge n$，右项为$b$的规则需要增加至n条。这就给设计规则的过程带来极大不便。
+如果判断是否满足 $x\ge 3$，则右项为 $b$ 的规则需要增加至 $3$ 条；以此类推，如果判断是否满足 $x\ge n$，右项为 $b$ 的规则需要增加至 $n$ 条。诸如此类的条件约束需要通过重写规则左项的模式来进行设计，这就给设计规则的过程带来极大不便。
 
-给重写规则增加条件约束，则可以大大地增加重写规则的表达能力。例如我们希望可以通过以下形式的规则来表示上述的情况：
+给重写规则增加条件约束，则可以大大地增加重写规则对条件控制的表达能力。例如我们希望可以通过以下形式的规则来表示上述的情况：
 \begin{eqnarray}
 f(x) & \ra & a ~~\mbox{ if }~~ x\ge \s^2(\zero) \nonumber \\
 f(x)  & \ra & b ~~\mbox{ if }~~ x < \s^2(\zero) \nonumber 
 \end{eqnarray}
 
+于是，人们提出了条件重写模型。
+
 \begin{definition}[条件重写规则]
 \label{d:crule}
-给定词汇表$\cF$，条件重写规则由重写规则和若干等式构成，形如
+给定词汇表 $\cF$，条件重写规则由重写规则和若干等式构成，形如
 \begin{eqnarray}
 l \ra r & \Dla & u_1 = v_1 \land \ldots \land u_n = v_n \;\; ,\nonumber
 \end{eqnarray}
-其中$l,r\in\TFX$，对$1\le i\le n$有$u_i,v_i\in\TFX$。其中$l$称作该条件重写规则的左项，$r$称作该条件重写规则的右项，$u_i = v_i$称作该条件重写规则的条件约束。
+其中 $l,r\in\TFX$，对 $1\le i\le n$ 有 $u_i,v_i\in\TFX$。其中 $l$ 称作该条件重写规则的左项，$r$ 称作该条件重写规则的右项，$u_i = v_i$ 称作该条件重写规则的条件约束。
 \end{definition}
 
 \begin{definition}[条件重写模型~\cite{DBLP:conf/ctrs/Gramlich94}]
 \label{d:crewrite-sys}
-给定词汇表$\cF$，条件重写模型是一个由若干条件重写规则组成的集合$\cR = \{l_i \ra r_i \Dla C_i \}_i$。
+给定词汇表 $\cF$，条件重写模型是一个由若干条件重写规则组成的集合 $\cR = \{l_i \ra r_i \Dla C_i \}_i$。
 \end{definition}
 
 \begin{example}
 \label{e:cond}
-假定$\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}, f^{(2)}, a^{(0)}, b^{(0)}, \true^{(0)}, \false^{(0)}, \mynot^{(1)}, \lessthan^{(2)} \}$。可定义以下条件重写模型：
+假定 $\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}, f^{(2)}, a^{(0)}, b^{(0)}, \true^{(0)}, \false^{(0)}, \mynot^{(1)}, \lessthan^{(2)} \}$。可定义以下条件重写模型：
 \begin{eqnarray}
-\cR = \{ &  & f(x) \ra a \;\Dla\; \mynot(\lessthan(x,\s^2(\zero))) = true \; , \nonumber \\
-         &  & f(x) \ra b \;\Dla\; \lessthan(x,\s^2(\zero)) = ture \;\;\;\;\; \}\mbox{。} \nonumber
+\cR = \{ &  & f(x) \ra a \;\Dla\; \mynot(\lessthan(x,\s^2(\zero))) = \true \; , \nonumber \\
+         &  & f(x) \ra b \;\Dla\; \lessthan(x,\s^2(\zero)) = \true \;\;\;\;\; \}\mbox{。} \nonumber
 \end{eqnarray}
 \end{example}
 
 例~\ref{e:cond} 中的两条规则对应了本小节开头提出的重写需求。
 
-虽然我们给出了条件重写规则的形式，但是其语义并不清晰。条件重写规则里的条件约束$u_i=v_i$，是代表$u_i$和$v_i$语法上的相等呢？是代表$u_i\eqps{*}{}v_i$呢？是代表存在$t$使$u_i\lrps{*}{}t\rlps{*}{}v_i$呢？还是$u_i\lrps{*}{}v_i$呢？关于条件约束的不同语义解释有多种讨论~\cite{brand1978completeness,DBLP:journals/jcss/BergstraK86,DBLP:conf/cade/DershowitzOS88}，这里我们采用最常用的实现方法：
-存在$t$使$u_i\lrps{*}{}t\rlps{*}{}v_i$。
+虽然我们给出了条件重写规则的语法形式，但是其语义并不清晰。条件重写规则里的条件约束 $u_i=v_i$，是代表 $u_i$ 和 $v_i$ 语法上的相等呢？还是代表 $u_i\eqps{*}{}v_i$ 成立呢？是代表存在 $t$ 使 $u_i\lrps{*}{}t\rlps{*}{}v_i$ 呢？还是 $u_i\lrps{*}{}v_i$ 成立呢？关于条件约束的不同语义解释有多种讨论~\cite{brand1978completeness,DBLP:journals/jcss/BergstraK86,DBLP:conf/cade/DershowitzOS88}，这里我们采用最常用的实现方法：存在 $t$ 使 $u_i\lrps{*}{}t\rlps{*}{}v_i$ 成立。
 
 \begin{definition}[条件重写]
 \label{d:crewriting}
-给定条件重写模型$\cR$，项表达式$u,v\in\TFX$，位置$p\in\Pos{u}$，条件重写规则$(l \ra r \Dla C_i) \in \cR$。如果存在代换$\sigma$满足$u|_p = \sigma(l)$，$v=u[\sigma(r)]_p$，以及对任意$(u_j = v_j)\in C_i$存在$t_j$使$u_j\lrps{*}{} t_j \rlps{*}{} v_j$， 则称$u$在位置$p$应用条件重写规则$l\ra r \Dla C_i$重写为$v$，记作$u\lrps{p}{l\ra r} v$。记号中的$p$和$l\ra r$可忽略不写。
+给定条件重写模型 $\cR$，项表达式 $u,v\in\TFX$，位置 $p\in\Pos{u}$，条件重写规则 $(l \ra r \Dla C_i) \in \cR$。如果存在代换 $\sigma$ 满足 $u|_p = \sigma(l)$，$v=u[\sigma(r)]_p$，以及对任意 $(u_j = v_j)\in C_i$ 存在 $t_j$ 使 $u_j\lrps{*}{} t_j \rlps{*}{} v_j$， 则称 $u$ 在位置 $p$ 应用条件重写规则 $l\ra r \Dla C_i$ 重写为 $v$，记作 $u\lrps{p}{l\ra r} v$。记号中的 $p$ 和 $l\ra r$ 可忽略不写。
 \end{definition}
 
-条件重写的意思是，被重写的子项表达式不仅需要是重写规则左项$l$的实例，且其对应的代换$\sigma$需要满足该规则的所有条件约束。
+条件重写的直观意思是，被重写的子项表达式不仅需要是重写规则左项 $l$ 的实例，且其对应的代换 $\sigma$ 需要满足该规则的所有条件约束。
 
 针对例~\ref{e:cond}，为了实现条件约束的求解，还需要加入以下规则：
 \begin{eqnarray}
@@ -484,7 +490,7 @@ l \ra r & \Dla & u_1 = v_1 \land \ldots \land u_n = v_n \;\; ,\nonumber
 \mynot(\true) & \ra & \false \;\;\mbox{。} \nonumber 
 \end{eqnarray}
 
-重写模型对应于条件重写模型中所有条件约束均为空的特殊情况。重写模型的相关概念，包括重写关系、终止性、范式及合流性，均可自然地扩展成条件重写模型的对应概念，在此不再赘述。给定任意模重写模型$\RE$，将其中的重写模型$\cR$替换成条件重写模型，则得到\emph{条件模重写}模型及其相关概念。
+重写模型对应于条件重写模型中所有条件约束均为空的特殊情况。重写模型的相关概念，包括重写关系、终止性、范式及合流性，均可自然地扩展成条件重写模型的对应概念，在此不再赘述。给定任意模重写模型 $\RE$，将其中的重写模型 $\cR$ 替换成条件重写模型，则得到\emph{条件模重写} 模型及其相关概念。
 
 
 \section{规范化条件重写模型}
@@ -492,34 +498,36 @@ l \ra r & \Dla & u_1 = v_1 \land \ldots \land u_n = v_n \;\; ,\nonumber
 
 在模重写和条件重写的基础上，本文提出一种新的重写模型扩展，叫\emph{规范化条件重写模型}。
 
-条件重写模型在应用某条重写规则时，需要判断其条件约束是否成立，即是否存在$t$使$u_i\lrps{*}{}t\rlps{*}{}v_i$，这个过程是不可判定的~\cite{DBLP:journals/ipl/Jacquemard03}。理想的做法是通过$u_i$和$v_i$的范式来确定条件是否成立，即判断是否有${\nf{u_i}{}} = {\nf{v_i}{}}$。此时，只需要在语法上判断是否相等即可。这就要求该条件重写模型是终止的，或者至少要求用于求范式的重写规则是终止的~\cite{DBLP:conf/cade/DershowitzOS88,DBLP:journals/tcs/DershowitzO90,DBLP:conf/rta/BertlingG89}。另一方面，在例~\ref{e:cond} 中，注意到用于求解条件约束的规则与描述需求的规则（即$f(x)\ra a$与$f(x)\ra b$）相对独立。规则$f(x)\ra a$和$f(x)\ra b$用于赋予模型语义，而其它规则则用于辅助定义$f(x)\ra a$和$f(x)\ra b$。这当中存在层次关系，而属于同一个重写规则集使得该有的区别模糊不清，这从概念上和技术上都是欠妥的。
+条件重写模型在应用某条重写规则时，需要判断其条件约束是否成立，即是否存在 $t$ 使 $u_i\lrps{*}{}t\rlps{*}{}v_i$ 成立，这个过程是不可判定的~\cite{DBLP:journals/ipl/Jacquemard03}。理想的做法是通过 $u_i$ 和 $v_i$ 的范式来确定条件是否成立，即判断是否有 ${\nf{u_i}{}} = {\nf{v_i}{}}$。此时，只需要在语法上判断是否相等即可。这就要求该条件重写模型是终止的，或者至少要求用于求范式的重写规则是终止的~\cite{DBLP:conf/cade/DershowitzOS88,DBLP:journals/tcs/DershowitzO90,DBLP:conf/rta/BertlingG89}。另一方面，根据我们对实际系统进行建模的经验，用于描述系统行为的规则（如例~\ref{e:cond} 的 $f(x)\ra a$ 和 $f(x)\ra b$）与用于求解条件约束的规则（如上述关于 $\lessthan$ 的规则）在一般情况下是独立的，且由于条件约束对应于目标系统中的条件判断，因此满足终止性与合流性。所以这两种规则在建模应用时存在层次关系，将它们归属于同一个重写规则集合从概念上和技术上都是欠妥的。
 
-本文提出的规范化（条件）重写模型，则是基于上述考虑，将（条件）模重写模型进一步划分层次。
+本文提出的规范化（条件）重写模型，则是基于上述考虑，将（条件）模重写模型进一步划分层次，在模型层面对确定性行为和非确定性行为予以区分。
 
 
 \begin{definition}[规范化重写模型]
 \label{d:normalrew-sys}
-给定词汇表$\cF$，规范化重写模型是一个由重写模型$\cR,\cS$和等价模型$\cE$组成的三元组，记作$\RSE \defeq \lb \cR, \cS, \cE \rb$。其中由$\cS$和$\cE$组成的模重写模型$\SE$必须满足终止性和合流性。
+给定词汇表 $\cF$，规范化重写模型是一个由重写模型 $\cR,\cS$ 和等价模型 $\cE$ 组成的三元组，记作 $\RSE \defeq \lb \cR, \cS, \cE \rb$。其中由 $\cS$ 和 $\cE$ 组成的模重写模型 $\SE$ 必须满足终止性和合流性。
 \end{definition}
 
-重写不一定是终止的，因此不能将任意重写模型的重写过程看作是化简的过程。例如规则$a\ra f(a)$会将项表达式$a$重写为更加复杂的表达式。但是当重写模型具有终止性时，重写过程就可以看作是一个化简的过程。规范化重写模型$\RSE$要求$\SE$是终止且合流的，使得$\SE$可看作一个良定义的化简函数：计算结果（范式）存在且唯一。因此，重写模型$\cS$可称作\emph{化简模型}，其对应的重写规则可称作\emph{化简规则}。
+重写不一定是终止的，因此不能将任意重写模型的重写过程看作是化简的过程。例如规则 $a\ra f(a)$ 会将项表达式 $a$ 重写为更加复杂的表达式。但是当重写模型具有终止性时，重写过程就可以看作是一个化简的过程。规范化重写模型 $\RSE$ 要求 $\SE$ 是终止且合流的，根据引理~\ref{l:convergence}，这意味着 $\SE$ 所描述的行为具有确定性——其重写结果不受重写过程的不确定性影响，得到的范式在 $=_{\cE}$ 等价的意义下唯一。这使得 $\SE$ 可看作一个良定义的化简函数：计算结果（范式）存在且唯一。因此，重写模型 $\cS$ 可称作\emph{化简模型}（simplifier），其对应的重写规则可称作\emph{化简规则}（simplification rule）。
+
+下面给出规范化重写模型的规则应用策略，即其形式化语义：
 
 \begin{definition}[规范化重写]
 \label{d:normalrewriting}
-给定规范化重写模型$\RSE$，项表达式$u,v\in\TFX$，重写规则$(l \ra r) \in \cR$。如果存在位置$p$和项表达式$s,t$满足
-${\nf{u}{\SE}} =_{\cE} s \lrps{p}{l\ra r} t$且$v = {\nf{t}{\SE}}$，则称$u$应用重写规则$l\ra r$规范化重写为$v$，记作$u\lrps{}{(l\ra r)_{\cS\cE}} v$。记号中的$(l\ra r)_{\cS\cE}$在不存在二义性时可忽略不写。
+给定规范化重写模型 $\RSE$，项表达式 $u,v\in\TFX$，重写规则 $(l \ra r) \in \cR$。如果存在位置 $p$ 和项表达式 $s,t$ 满足 
+${\nf{u}{\SE}} =_{\cE} s \lrps{p}{l\ra r} t$ 且 $v = {\nf{t}{\SE}}$，则称 $u$ 应用重写规则 $l\ra r$ 规范化重写为 $v$，记作 $u\lrps{}{(l\ra r)_{\cS\cE}} v$。记号中的 $(l\ra r)_{\cS\cE}$ 在不存在二义性时可忽略不写。
 \end{definition}
 
-简单地说，如果$u\lrps{}{(l\ra r)_{\cS\cE}}v$，则$u$和$v$之间存在关系
-$u \lrps{!}{\SE} {\nf{u}{\SE}} =_{\cE} s \lrps{p}{l\ra r} t \lrps{!}{\SE} {\nf{t}{\SE}} = v$。从技术上看，给定项表达式$u$，要想对$u$进行规范化重写，需要先对$u$进行规范化，得到$u$关于$\SE$的范式$\nf{u}{\SE}$。然后在$\nf{u}{\SE}$关于$=_{\cE}$的等价类中选定项表达式$s$，对其进行重写得到项表达式$t$。最后对$t$进行规范化得到其关于$\SE$的范式$\nf{t}{\SE}$。
+简单地说，如果 $u\lrps{}{(l\ra r)_{\cS\cE}}v$，则 $u$ 和 $v$ 之间存在关系 
+$u \lrps{!}{\SE} {\nf{u}{\SE}} =_{\cE} s \lrps{p}{l\ra r} t \lrps{!}{\SE} {\nf{t}{\SE}} = v$。从技术上看，给定项表达式 $u$，要想对 $u$ 进行规范化重写，需要先对 $u$ 进行规范化，得到 $u $关于 $\SE$ 的范式 $\nf{u}{\SE}$。然后在 $\nf{u}{\SE}$ 关于 $=_{\cE}$ 的等价类中选定项表达式 $s$，利用 $\cR$ 对其进行标准重写得到项表达式 $t$。最后对 $t$ 进行规范化得到其关于 $\SE$ 的范式 $\nf{t}{\SE}$。
 
-规范化重写技术在应用重写规则前，要求项表达式必须是范式。在应用重写规则后，又显式地进行规范化，使最终得到的项表达式成为范式。这就保证对于任意规范化重写序列$u_0 \lrps{}{} u_1 \lrps{}{} \ldots \lrps{}{} u_n$，对任意$i\in [1,n]$满足$u_i$是关于$\SE$的范式，即重写序列中的项表达式始终处于“最简”形式。
+规范化重写技术在应用重写规则前，要求项表达式必须是范式。在应用重写规则后，又显式地进行规范化，使最终得到的项表达式成为范式。这就保证对于任意规范化重写序列 $u_0 \lrps{}{} u_1 \lrps{}{} \ldots \lrps{}{} u_n$，对任意 $i\in [1,n]$ 满足 $u_i$ 是关于 $\SE$ 的范式，即重写序列中的项表达式始终处于“最简”形式。从行为的角度分析，规范化重写保证了每次执行非确定性行为前，所有可能的确定性行为都必须被执行完毕；而每次执行完一次非确定性行为，接下来可能发生的所有确定性行为都需要被执行。
 
-规范化重写模型通过对规则分类，使模型的语义更加清晰：$\cE$描述与等价相关的语义，$\cS$描述与函数计算、形式简化相关的语义，$\cR$描述最核心的、用户关心的语义。
+规范化重写模型通过对规则分类，使模型的语义更加清晰：$\cE$ 描述与等价相关的语义，$\cS$ 描述与函数计算、形式简化、确定性行为相关的语义，$\cR$ 描述最核心的、非确定性行为相关的语义。
 
 \begin{example}
 \label{e:river}
-假定$\cF = \{\comp^{(2)}, \farmer^{(1)}, \wolf^{(1)}, \lamb^{(1)}, \grass^{(1)}, \lhs^{(0)}, \rhs^{(0)}, \change^{(1)} \}$，其中函数符号$\comp$采用中缀记法，即$x\comp y$表示$\comp(x,y)$。可定义规范化重写模型$\RSE$，其中：
+假定 $\cF = \{\comp^{(2)}, \farmer^{(1)}, \wolf^{(1)}, \lamb^{(1)}, \grass^{(1)}, \lhs^{(0)}, \rhs^{(0)}, \change^{(1)} \}$，其中函数符号 $\comp$ 采用中缀记法，即 $x\comp y$ 表示 $\comp(x,y)$。可定义规范化重写模型 $\RSE$，其中：
 \begin{eqnarray}
 \cE = \{ &  & x\comp y \sim y\comp x \; , \nonumber \\
          &  & (x\comp y) \comp z \sim x \comp (y\comp z)  \;\;\;\;\; \} \; ; \nonumber \\
@@ -554,64 +562,59 @@ t & = & \farmer(\lhs) \comp \wolf(\lhs) \comp
 \end{eqnarray}
 \end{example}
 
-例~\ref{e:river} 描述的是农夫过河的问题。$\lhs$和$\rhs$分别表示河的左岸和右岸；$\farmer(x)$、$\wolf(x)$、$\lamb(x)$和$\grass(x)$分别表示农夫、狼、羊和草当前所处位置为河的$x$岸；$\change(x)$表示$x$岸的对岸；$\comp$作为连接符构成农夫、狼、羊和草在任一时刻的状态，如$\farmer(\lhs) \comp \lamb(\lhs) \comp \wolf(\rhs) \comp \grass(\lhs)$
-表示当前状态为农夫在左岸、羊在左岸、狼在右岸、草在左岸。$\cE$的等价规则分别表示函数符号$\comp$具有交换律和结合律，因此$\comp$连接的多个项表达式构成了一个多重集合，其中的括号可以省略。$\cS$的重写规则定义了化简$\change$的方式。$\cR$的四条规则定义了系统状态发生改变的四种方式：(1) 农夫独自一人过河；(2) 农夫带着狼过河；(3) 农夫带羊过河；(4) 农夫带草过河。$\cR$的规则用数字进行了编号。例~\ref{e:river} 的重写序列描述了一种可能的方案，从农夫、狼、羊和草都处于左岸的初始状态，变成四者都处于右岸的状态。序列中用右箭头的数字下标表示规范化重写应用的规则编号。
+例~\ref{e:river} 描述的是农夫过河的问题。$\lhs$ 和 $\rhs$ 分别表示河的左岸和右岸；$\farmer(x)$、$\wolf(x)$、$\lamb(x)$ 和 $\grass(x)$ 分别表示农夫、狼、羊和草当前所处位置为河的 $x$ 岸；$\change(x)$ 表示 $x$ 岸的对岸；函数符号 $\comp$ 作为连接符构成农夫、狼、羊和草在任一时刻的状态，如 $\farmer(\lhs) \comp \lamb(\lhs) \comp \wolf(\rhs) \comp \grass(\lhs)$ 表示当前状态为农夫在左岸、羊在左岸、狼在右岸、草在左岸。$\cE$ 的等价规则分别表示函数符号 $\comp$ 具有交换律和结合律，因此 $\comp$ 连接的多个项表达式构成了一个\emph{多重集合}，其中的括号可以省略。$\cS$ 的化简规则定义了化简 $\change$ 的方式。$\cR$ 的四条规则定义了系统状态发生改变的四种方式：(1) 农夫独自一人过河；(2) 农夫带着狼过河；(3) 农夫带羊过河；(4) 农夫带草过河。$\cR$ 的规则用数字进行了编号。例~\ref{e:river} 的重写序列描述了一种可能的方案，从农夫、狼、羊和草都处于左岸的初始状态，变成四者都处于右岸的状态。序列中用右箭头的数字下标表示规范化重写应用的规则编号。
 
 \begin{definition}[规范化重写关系]
-给定定义在词汇表$\cF$上的规范化重写模型$\RSE$，$\RSE$对应的规范化重写关系$\lrps{}{\RSE}$定义为$\TFX$上的二元关系：
+给定定义在词汇表 $\cF$ 上的规范化重写模型 $\RSE$，$\RSE$ 对应的规范化重写关系 $\lrps{}{\RSE}$ 定义为 $\TFX$ 上的二元关系：
 \begin{eqnarray}
 \lrps{}{\RSE} & \defeq & \{ \lb u,v\rb 
-\mid \mbox{存在$(l\ra r)\in\cR$，满足$u\lrps{}{(l\ra r)_{\cS\cE}}v$}\}  \nonumber 
+\mid \mbox{存在 $(l\ra r)\in\cR$，满足 $u\lrps{}{(l\ra r)_{\cS\cE}}v$}\}  \nonumber 
 \end{eqnarray}
-给定规范化重写关系 $\lrps{}{\RSE}$，它的对称闭包记作$\eqps{}{\RSE}$，自反传递闭包记作 
-$\lrps{*}{\RSE}$，自反对称传递闭包记作$\eqps{*}{\RSE}$。
+给定规范化重写关系 $\lrps{}{\RSE}$，它的对称闭包记作 $\eqps{}{\RSE}$，自反传递闭包记作 $\lrps{*}{\RSE}$，自反对称传递闭包记作 $\eqps{*}{\RSE}$。
 \end{definition}
 
-类似地，条件约束可以增加规范化重写模型的表达能力，扩展得到\emph{规范化条件重写模型}。
+类似地，条件约束可以增加规范化重写模型对条件控制的建模能力，扩展得到\emph{规范化条件重写模型}。
 
 
 \begin{definition}[规范化条件重写模型]
 \label{d:cnormalrew-sys}
-给定词汇表$\cF$，规范化条件重写模型是一个由条件重写模型$\cR,\cS$和等价模型$\cE$组成的三元组，记作$\RSE \defeq \lb \cR, \cS, \cE \rb$。其中由$\cS$和$\cE$组成的条件模重写模型$\SE$必须满足终止性和合流性。
+给定词汇表 $\cF$，规范化条件重写模型是一个由条件重写模型 $\cR,\cS$ 和等价模型 $\cE$ 组成的三元组，记作 $\RSE \defeq \lb \cR, \cS, \cE \rb$。其中由 $\cS$ 和 $\cE$ 组成的条件模重写模型 $\SE$ 必须满足终止性和合流性。
 \end{definition}
 
-上文已经提到，条件重写模型是重写模型的一种自然扩展。规范化条件重写模型仅仅是将规范化重写模型$\lb \cR, \cS, \cE\rb$中的标准重写模型$\cR$和$\cS$扩展为条件重写模型，且同样对$\SE$的终止性和合流性有要求。
+上文已经提到，条件重写模型是重写模型的一种自然扩展。从语法上看，规范化条件重写模型仅仅是将规范化重写模型 $\lb \cR, \cS, \cE\rb$ 中的标准重写模型 $\cR$ 和 $\cS$ 扩展为条件重写模型，且同样对 $\SE$ 的终止性和合流性有要求。
 
-虽然在形式上看，规范化条件重写模型只是简单地将重写规则替换为条件重写规则。但从语义解释上，却与简单的替换有所不同。
+虽然从语法上看，规范化条件重写模型只是简单地将重写规则替换为条件重写规则。但从语义上，却有别于简单的替换：
 
 \begin{definition}[规范化条件重写]
 \label{d:cnormalrewriting}
-给定规范化条件重写模型$\RSE$，项表达式$u,v\in\TFX$，条件重写规则$(l \ra r \Dla C_i) \in \cR$。如果存在位置$p$、代换$\sigma$和项表达式$s,t$满足：
+给定规范化条件重写模型 $\RSE$，项表达式 $u,v\in\TFX$，条件重写规则 $(l \ra r \Dla C) \in \cR$。如果存在位置 $p$、代换 $\sigma$ 和项表达式 $s,t$ 满足：
 \begin{enumerate}[(i)]
 \item ${\nf{u}{\SE}} =_{\cE} s$；    
 \item $s|_p = \sigma(l)$，$t = s[\sigma(r)]_p$；
-\item 对任意$(u_j = v_j)\in C_i$，存在$w_j$使$u_j\lrps{*}{\SE} w_j \rlps{*}{\SE} v_j$；
+\item 对任意 $(u_j = v_j)\in C$，存在 $w_j$ 使 $u_j\lrps{*}{\SE} w_j \rlps{*}{\SE} v_j$；
 \item $v = {\nf{t}{\SE}}$；
 \end{enumerate}
-则称$u$应用条件重写规则$l\ra r \Dla C_i$规范化条件重写为$v$，记作$u\lrps{}{(l\ra r)_{\cS\cE}} v$。记号中的$(l\ra r)_{\cS\cE}$在不存在二义性时可忽略不写。
+则称 $u$ 应用条件重写规则 $l\ra r \Dla C$ 规范化条件重写为 $v$，记作 $u\lrps{}{(l\ra r)_{\cS\cE}} v$。记号中的 $(l\ra r)_{\cS\cE}$ 在不存在二义性时可忽略不写。
 \end{definition}
  
 
-与规范化重写类似，如果$u\lrps{}{(l\ra r)_{\cS\cE}}v$，则$u$和$v$之间存在关系
-$u \lrps{!}{\SE} {\nf{u}{\SE}} =_{\cE} s \lrps{p}{l\ra r} t \lrps{!}{\SE} {\nf{t}{\SE}} = v$。
-但需要注意其中的条件重写步骤$s\lrps{p}{l\ra r}t$，它判断条件约束$u_j=v_j$是否成立时，不是递归地使用模型$\RSE$，而是直接使用$\SE$。也就是说，$u_j$和$v_j$需要满足
-$u_j\lrps{*}{\SE} w_j \rlps{*}{\SE} v_j$而不是$u_j\lrps{*}{\RSE} w_j \rlps{*}{\RSE} v_j$。由于条件模重写模型$\SE$是终止且合流的，$u_j\lrps{*}{\SE} w_j \rlps{*}{\SE} v_j$可以进一步简化为${\nf{u_j}{\SE}} =_{\cE} {\nf{v_j}{\SE}}$，这就在一定程度上解决了本小节开头提出的不可判定性问题，使规范化条件重写从技术上可以被实现。
+与规范化重写类似，如果 $u\lrps{}{(l\ra r)_{\cS\cE}}v$，则 $u$ 和 $v$ 之间存在关系 
+$u \lrps{!}{\SE} {\nf{u}{\SE}} =_{\cE} s \lrps{p}{l\ra r} t \lrps{!}{\SE} {\nf{t}{\SE}} = v$。但需要注意其中的条件重写步骤 $s\lrps{p}{l\ra r}t$，它判断条件约束 $u_j=v_j$ 是否成立时，不是递归地使用模型 $\RSE$，而是直接使用 $\SE$。也就是说，$u_j$ 和 $v_j$ 需要满足 $u_j\lrps{*}{\SE} w_j \rlps{*}{\SE} v_j$ 而不是 $u_j\lrps{*}{\RSE} w_j \rlps{*}{\RSE} v_j$。由于条件模重写模型 $\SE$ 是终止且合流的，$u_j\lrps{*}{\SE} w_j \rlps{*}{\SE} v_j$ 可以进一步简化为 ${\nf{u_j}{\SE}} =_{\cE} {\nf{v_j}{\SE}}$，这就在一定程度上解决了本小节开头提出的不可判定性问题，使规范化条件重写从技术上可以被实现。
 
 与规范化重写类似，从技术上看，规范化条件重写也必须经过规范化、条件重写、规范化三个过程。这保证了规范化条件重写序列中的任意项表达式都始终处于“最简”形式。
 
 \begin{definition}[规范化条件重写关系]
-给定定义在词汇表$\cF$上的规范化条件重写模型$\RSE$，$\RSE$对应的规范化条件重写关系$\lrps{}{\RSE}$定义为$\TFX$上的二元关系：
+给定定义在词汇表 $\cF$ 上的规范化条件重写模型 $\RSE$，$\RSE$ 对应的规范化条件重写关系 $\lrps{}{\RSE}$ 定义为 $\TFX$ 上的二元关系：
 \begin{eqnarray}
 \lrps{}{\RSE} & \defeq & \{ \lb u,v\rb 
-\mid \mbox{存在$(l\ra r)\in\cR$，满足$u\lrps{}{(l\ra r)_{\cS\cE}}v$}\}  \nonumber 
+\mid \mbox{存在 $(l\ra r \Dla C)\in\cR$，满足 $u\lrps{}{(l\ra r)_{\cS\cE}}v$}\}  \nonumber 
 \end{eqnarray}
-给定规范化条件重写关系 $\lrps{}{\RSE}$，它的对称闭包记作$\eqps{}{\RSE}$，自反传递闭包记作 
-$\lrps{*}{\RSE}$，自反对称传递闭包记作$\eqps{*}{\RSE}$。
+给定规范化条件重写关系 $\lrps{}{\RSE}$，它的对称闭包记作 $\eqps{}{\RSE}$，自反传递闭包记作 $\lrps{*}{\RSE}$，自反对称传递闭包记作 $\eqps{*}{\RSE}$。
 \end{definition}
 
 \begin{example}
 \label{e:cnormalrew}
-假定$\cF = \{\zero^{(0)}, \s^{(1)}, f^{(2)}, a^{(0)}, b^{(0)}, \true^{(0)}, \false^{(0)}, \mynot^{(1)}, \lessthan^{(2)} \}$。可定义规范化条件重写模型$\RSE$，其中：
+假定 $\cF = \{\zero^{(0)}, \s^{(1)}, f^{(2)}, a^{(0)}, b^{(0)}, \true^{(0)}, \false^{(0)}, \mynot^{(1)}, \lessthan^{(2)} \}$。可定义规范化条件重写模型 $\RSE$，其中：
 \begin{eqnarray}
 \cE = \phantom{\{} & & \emptyset \; ; \nonumber \\
 \cS = \{ & & \lessthan(x,\zero)  \ra  \false \; , \nonumber \\
@@ -619,8 +622,8 @@ $\lrps{*}{\RSE}$，自反对称传递闭包记作$\eqps{*}{\RSE}$。
          & & \lessthan(\s(x),\s(y))  \ra  \lessthan(x,y) \; , \nonumber \\
          & & \mynot(\false) \ra \true \; , \nonumber \\
          & & \mynot(\true) \ra  \false \;\;\;\;\;\;\;\qquad\quad\quad\qquad\quad \} \; ; \nonumber \\
-\cR = \{ &  & f(x) \ra a \;\Dla\; \mynot(\lessthan(x,\s^2(\zero))) = true \; , \nonumber \\
-         &  & f(x) \ra b \;\Dla\; \lessthan(x,\s^2(\zero)) = ture \;\;\;\;\;\qquad \}\mbox{。} \nonumber
+\cR = \{ &  & f(x) \ra a \;\Dla\; \mynot(\lessthan(x,\s^2(\zero))) = \true \; , \nonumber \\
+         &  & f(x) \ra b \;\Dla\; \lessthan(x,\s^2(\zero)) = \true \;\;\;\;\;\qquad \}\mbox{。} \nonumber
 \end{eqnarray}
 \end{example}
 
@@ -629,7 +632,7 @@ $\lrps{*}{\RSE}$，自反对称传递闭包记作$\eqps{*}{\RSE}$。
 
 \begin{example}
 \label{e:clock}
-假定$\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}, \clock^{(1)}, \broken^{(0)}, \true^{(0)}, \false^{(0)}, \mynot^{(1)}, \lessthan^{(2)} \}$。可定义规范化条件重写模型$\RSE$，其中：
+假定 $\cF = \{\zero^{(0)}, \s^{(1)}, \add^{(2)}, \clock^{(1)}, \broken^{(0)}, \true^{(0)}, \false^{(0)}, \mynot^{(1)}, \lessthan^{(2)} \}$。可定义规范化条件重写模型 $\RSE$，其中：
 \begin{eqnarray}
 \cE = \{ &  & \add(x, y) \sim \add(y,x) \; , \nonumber \\
          &  & \add(\add(x,y), z) \sim \add(x,\add(y,z)) \;\;\; \}\; ;
@@ -670,11 +673,38 @@ t & = & \clock(\s^0(\zero)) \lrps{}{1} \clock(\s^1(\zero))
 \end{eqnarray}
 \end{example}
 
-例~\ref{e:clock} 描述的是一个只显示时针读数（0--11）的时钟，且这个时钟随时可能损坏。函数符号$\zero$、$\s$和$\add$用于表示自然数及自然数加法，之前已详细介绍，在此不再赘述；函数符号$\true$、$\false$分别表示命题为真和命题为假，$\mynot$表示逻辑“非”运算，$\lessthan(x,y)$表示命题“x小于y”，这四个函数符号用于定义重写规则的条件约束；$\clock(x)$表示时钟当前读数为$x$；$\broken$表示时钟当前已损坏。$\cE$的等价规则分别表示自然数加法$\add$的交换律和结合律。化简模型$\cS$包含两部分，前两条规则定义了$\add$的语义，即其计算方式；后三条规则定义了$\lessthan$的语义，即如何计算命题“x小于y”的真值。$\cR$的重写规则定义了系统状态发生改变的三种方式：规则1表示，如果时钟当前读数$x$小于11，则下一个状态的读数为$x+1$；规则2表示，如果时钟当前读数$x$不小于11，则下一个状态的读数为0（归零）；规则3表示，无论时钟当前读数是多少，下一个状态时钟可能损坏。例~\ref{e:clock} 的重写序列描述了从初始状态（时钟读数为0）开始，该时钟可能发生的（其中）三种事件序列，其中箭头下标的数字表示该规范化条件重写应用的规则编号。序列1表示时钟读数从0递增至11，然后归零，周而复始，该时钟始终保持正常运作。序列2表示时钟读数从0递增至2，然后发生损坏。序列3表示时钟读数从0递增至11，然后发生损坏。
+例~\ref{e:clock} 描述的是一个只显示时针读数（0--11）的时钟，且这个时钟随时可能损坏。函数符号 $\zero$、$\s$ 和 $\add$ 用于表示自然数及自然数加法，之前已详细介绍，在此不再赘述；函数符号 $\true$、$\false$ 分别表示命题为真和命题为假，$\mynot$ 表示逻辑“非”运算，$\lessthan(x,y)$ 表示命题“$x$ 小于 $y$”，这四个函数符号用于定义重写规则的条件约束；$\clock(x)$ 表示时钟当前读数为 $x$；$\broken$ 表示时钟当前已损坏。$\cE$ 的等价规则分别表示自然数加法 $\add$ 的交换律和结合律。化简模型 $\cS$ 包含两部分，前两条规则定义了 $\add$ 的语义，即其计算方式；后三条规则定义了 $\lessthan$ 的语义，即如何计算命题“$x$ 小于 $y$”的真值。$\cR$ 的重写规则定义了系统状态发生改变的三种方式：规则 1 表示，如果时钟当前读数 $x$ 小于 11，则下一个状态的读数为 $x+1$；规则 2 表示，如果时钟当前读数 $x$ 不小于 11，则下一个状态的读数为 0（归零）；规则 3 表示，无论时钟当前读数是多少，下一个状态时钟可能损坏。例~\ref{e:clock} 的重写序列描述了从初始状态（时钟读数为 0）开始，该时钟可能发生的（其中）三种事件序列，其中箭头下标的数字表示该规范化条件重写应用的规则编号。序列 1 表示时钟读数从 0 递增至 11，然后归零，周而复始，该时钟始终保持正常运作。序列 2 表示时钟读数从 0 递增至 2，然后发生损坏。序列 3 表示时钟读数从 0 递增至 11，然后发生损坏。
 
-从例~\ref{e:clock} 可以看出，时钟状态是观察者关心的行为，而自然数加法、命题真值的计算只是为描述时钟状态服务，观察者并不关心。从建模的角度来看，将所有规则平等看待，非常不利于建模人员或其它模型使用者理解模型的语义。规范化条件重写模型以一种划分的方式，将模型的主要语义和辅助语义予以区分。
+从例~\ref{e:clock} 可以看出，时钟状态是观察者关心的行为，而自然数加法、命题真值的计算只是为描述时钟状态服务，观察者并不关心。从建模的角度来看，将所有规则平等看待，非常不利于建模人员或其它模型使用者理解模型的语义。规范化条件重写模型以一种划分的方式，将模型的主要语义和辅助语义予以区分，同时也将模型的确定性行为与非确定性行为予以区分。
+
+规范化条件重写模型中关于化简模型 $\cS$ 的构思来源于 Jouannaud 和 Li 提出的范式重写模型~\cite{DBLP:conf/csl/JouannaudL12}，其源头又可以追溯到 Nipkow 在高阶重写中应用的  $\beta\eta$ 范式~\cite{DBLP:conf/lics/Nipkow91}。与本文的规范化条件重写模型不同的是，范式重写要求在应用 $\cR$ 的规则进行标准重写前，需要对被重写的项表达式进行 $\cS\cE$ 模式匹配而不是 $\cE$ 模式匹配，其中 $\cS\cE\defeq\cS\cup\cS^{-1}\cup\cE$。也就是说，在定义~\ref{d:cnormalrewriting} 中，条件 (i) 需要替换为 ${\nf{u}{\SE}} =_{\cS\cE} s$。$\cS\cE$ 模式匹配的复杂度比 $\cE$ 模式匹配的复杂度高，且在不对 $\cS$ 进行约束的情况下，$\cS\cE$ 模式匹配极有可能是不可判定的。由于范式重写模型的提出在于给重写模型的终止性及汇合性分析提供一般化的理论框架，因此判定性问题不在其考虑范围。但作为建模工具提出的规范化条件重写模型，则不得不考虑判定性问题带来的实现问题。另一方面，范式重写由于涉及到 $\cS\cE$ 等价类，因此其 $\cS$ 规则集并不完全是关于确定性行为的描述。
+
+规范化条件重写模型与标准重写模型及其几种相关扩展的表达能力对比总结如表~\ref{tab:rs} 所示。
+
+\begin{table}[htbp]
+\caption{重写模型及其扩展的表达能力对比}
+\label{tab:rs}
+\centering
+\begin{minipage}[t]{0.95\textwidth}
+\begin{tabularx}{\textwidth}{lX<{\centering}X<{\centering}X<{\centering}X<{\centering}} 
+\toprule[1.5pt]
+模型 & 等价关系 & 条件约束 & 确定性行为 \\
+\midrule[1pt]
+重写模型 & \nonsup & \nonsup & \nonsup \\
+模重写模型 & \allsup & \nonsup & \nonsup \\
+类重写模型 & \allsup & \nonsup & \nonsup \\
+条件重写模型 & \nonsup & \allsup & \nonsup \\
+重写逻辑 & \allsup & \allsup & \nonsup \\
+范式重写模型 & \allsup & \nonsup & \halfsup \\
+规范化条件重写模型 & \allsup & \allsup & \allsup \\ 
+\bottomrule[1.5pt]
+\end{tabularx}\\[5pt]
+\footnotesize 注：“\allsup”表示“支持”；“\halfsup”表示“支持有限”，“\nonsup”表示“不支持”。
+\end{minipage}
+\end{table}
+
 
 \section{本章小结}
 
-本章对已有的重写模型及其经典扩展进行了形式化定义。基于模重写模型与条件重写模型这些经典扩展，针对实际系统中的确定性行为与非确定性行为的语义区分这一问题，本章提出了规范化重写模型及规范化条件重写模型，并对其进行了严格的形式化定义，明确了模型的语义。规范化条件重写模型的提出，为基于该模型的嵌入式系统建模框架奠定了基础。
+本章对已有的重写模型及其经典扩展进行了形式化定义。基于模重写模型与条件重写模型这些经典扩展，针对实际系统中的确定性行为与非确定性行为的语义区分这一问题，本章提出了规范化重写模型及规范化条件重写模型，并对其语法及语义进行了严格的形式化定义，且将其表达能力与相关的重写模型扩展形式进行了对比。规范化条件重写模型的提出，有利于建模过程及验证过程对确定性行为与非确定性行为进行划分，为基于该模型的嵌入式系统建模验证框架奠定了基础。
 
