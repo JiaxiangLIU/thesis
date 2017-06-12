@@ -79,8 +79,6 @@
 \item 
 针对模型易用性问题，以嵌入式系统软件的自动建模为另一切入点，本文开发了一套基于规范化条件重写模型的 C 程序终止性自动验证工具 \CTerm，为系统的完全正确性提供了必要的工具支持。
 \end{enumerate}
-
-作为本文的应用案例之一，机车优化控制系统目前运行稳定，并在沈阳铁路局通过了实车运用考核；而经过本文建模验证的速率单调调度系统目前在某工业级航天控制器中在线运行。
 \end{cabstract}
 
 % 如果习惯关键字跟在摘要文字后面，可以用直接命令来设置，如下：
@@ -94,13 +92,12 @@ formal methods for verifying the correctness of embedded systems are in great de
 
 Recently, rewrite systems have won attention for formal verification, given the facts that they are suitable for modeling the behaviors of multithreads and they support multiple verification techniques such as model checking and theorem proving. To apply rewrite systems on realistic verification projects for embedded systems, we need to answer two questions: (1) How do we capture sequential behaviors via rewrite systems inheriting non-determinism? (2) How do we enhance the usability of rewrite systems to ease the modeling process? To answer these questions, this dissertation introduces a new formal model named \emph{normalization conditional rewrite systems}. Based on the new model, we develop a methodology for modeling embedded systems and a termination prover \CTerm\xspace for C programs: 
 
-\begin{enumerate}
+\begin{enumerate} 
 \item Aimed at the limitation of rewrite systems for expressing sequential behaviors, this dissertation introduces normalization conditional rewrite systems, which are able to describe deterministic behaviors. Normalization conditional rewrite systems support user-defined data types and the expressivity for state equivalence and conditional branching. They can also model and distinguish the semantics of non-deterministic behaviors, such as those concurrently in hardware, and of deterministic behaviors, such as those sequentially in software. 
 \item Aimed at the usability of the model, focusing on modeling methodologies, this dissertation proposes a methodology which captures the hierarchy, the heterogeneous behaviors, the dynamic structures and the real-timeness of embedded systems. We implement the methodology based on semantics mapping. Then we demonstrate its feasibility for application, by applying it on two realistic embedded systems. 
 \item Aimed at the usability of the model, focusing on the automatic construction of models of embedded software, this dissertation develops an automatic termination prover \CTerm\xspace for C programs based on normalization conditional rewrite systems. The tool provides the possibility to prove the total correctness of systems. 
 \end{enumerate}
 
-As one of the case studies, the Train Optimized Control System is currently in smooth operation, and passes the on-board test by Shenyang Railway Administration; the formally verified Rate-Monotonic Scheduling System by this dissertation has been serving in some industrial avionic control system.
 \end{eabstract}
 
 % \ekeywords{\TeX, \LaTeX, CJK, template, thesis}
